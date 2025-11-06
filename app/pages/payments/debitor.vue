@@ -173,6 +173,8 @@
           <Pagination
             v-model:page="currentPage"
             :total="filteredDebitors.length"
+            :items-per-page="itemsPerPage"
+            :sibling-count="1"
             @update:page="onPageChange"
           >
             <PaginationContent>
@@ -184,7 +186,8 @@
               <PaginationItem
                 v-for="pageNum in displayedPages"
                 :key="pageNum"
-                :active="pageNum === currentPage"
+                :value="pageNum"
+                :is-active="pageNum === currentPage"
                 @click="navigatePage(pageNum)"
               >
                 {{ pageNum }}
@@ -422,7 +425,6 @@ const filteredDebitors = computed(() => {
 });
 
 const totalPages = computed(() => {
-  totalItems.value = filteredDebitors.value.length;
   return Math.max(1, Math.ceil(filteredDebitors.value.length / itemsPerPage));
 });
 
@@ -433,11 +435,11 @@ const paginatedDebitors = computed(() => {
 });
 
 const paginationStart = computed(() => {
-  return totalItems.value === 0 ? 0 : (currentPage.value - 1) * itemsPerPage + 1;
+  return filteredDebitors.value.length === 0 ? 0 : (currentPage.value - 1) * itemsPerPage + 1;
 });
 
 const paginationEnd = computed(() => {
-  return Math.min(currentPage.value * itemsPerPage, totalItems.value);
+  return Math.min(currentPage.value * itemsPerPage, filteredDebitors.value.length);
 });
 
 // Pagination display helpers
@@ -495,9 +497,7 @@ const fetchDebitors = async () => {
     );
 
     debitors.value = response.payments || [];
-
-    // Reset to first page when data changes
-    currentPage.value = 1;
+    totalItems.value = response.count || 0;
   } catch (error) {
     console.error("Failed to fetch debitor data:", error);
     toast.toast({
@@ -506,6 +506,7 @@ const fetchDebitors = async () => {
       variant: "destructive",
     });
     debitors.value = [];
+    totalItems.value = 0;
   } finally {
     loading.value = false;
   }
@@ -544,13 +545,17 @@ const refreshData = () => {
 
 // Navigation functions for pagination
 const navigatePage = (newPage: number) => {
-  currentPage.value = newPage;
-  updateUrlParams();
+  if (newPage >= 1 && newPage <= totalPages.value) {
+    currentPage.value = newPage;
+    updateUrlParams();
+  }
 };
 
 const onPageChange = (newPage: number) => {
-  currentPage.value = newPage;
-  updateUrlParams();
+  if (newPage >= 1 && newPage <= totalPages.value) {
+    currentPage.value = newPage;
+    updateUrlParams();
+  }
 };
 
 const updateUrlParams = () => {
