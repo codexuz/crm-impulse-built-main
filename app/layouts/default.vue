@@ -162,7 +162,7 @@
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton asChild>
                           <NuxtLink to="/payments">
-                            To'lovlar
+                            Qilingan to'lovlar
                           </NuxtLink>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -170,6 +170,13 @@
                         <SidebarMenuSubButton asChild>
                           <NuxtLink to="/payments/upcoming">
                             Kelayotgan to'lovlar
+                          </NuxtLink>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <NuxtLink to="/payments/debitor">
+                            Qarzdorlar
                           </NuxtLink>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
