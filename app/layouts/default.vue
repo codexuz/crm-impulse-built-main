@@ -162,6 +162,14 @@
                   </NuxtLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NuxtLink to="/cd-ielts">
+                    <Icon name="lucide:file-text" />
+                    <span>CD IELTS</span>
+                  </NuxtLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
