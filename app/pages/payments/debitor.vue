@@ -167,7 +167,8 @@
           <div class="text-sm text-muted-foreground">
             Showing <span class="font-medium">{{ paginationStart }}</span> to
             <span class="font-medium">{{ paginationEnd }}</span> of
-            <span class="font-medium">{{ filteredDebitors.length }}</span> debitors
+            <span class="font-medium">{{ filteredDebitors.length }}</span>
+            debitors
           </div>
 
           <Pagination
@@ -435,11 +436,16 @@ const paginatedDebitors = computed(() => {
 });
 
 const paginationStart = computed(() => {
-  return filteredDebitors.value.length === 0 ? 0 : (currentPage.value - 1) * itemsPerPage + 1;
+  return filteredDebitors.value.length === 0
+    ? 0
+    : (currentPage.value - 1) * itemsPerPage + 1;
 });
 
 const paginationEnd = computed(() => {
-  return Math.min(currentPage.value * itemsPerPage, filteredDebitors.value.length);
+  return Math.min(
+    currentPage.value * itemsPerPage,
+    filteredDebitors.value.length
+  );
 });
 
 // Pagination display helpers
@@ -569,7 +575,7 @@ const updateUrlParams = () => {
     query.search = searchQuery.value;
   }
 
-  if (daysFilter.value !== 'all') {
+  if (daysFilter.value !== "all") {
     query.filter = daysFilter.value;
   }
 
@@ -633,14 +639,12 @@ const sendReminder = (debitor: any) => {
   selectedDebitor.value = debitor;
 
   // Pre-populate reminder message based on days overdue
-  const daysText = debitor.days_overdue === 1 ? "day" : "days";
-  reminderDetails.message = `Dear ${
+  const daysText = debitor.days_overdue === 1 ? "kun" : "kun";
+  reminderDetails.message = `Hurmatli ${
     debitor.student_name
-  },\n\nThis is a reminder that your payment of ${formatCurrency(
-    debitor.amount
-  )} is overdue by ${
+  },\nSizning ${formatCurrency(debitor.amount)} miqdoridagi to'lovingiz ${
     debitor.days_overdue
-  } ${daysText}. Please make your payment as soon as possible.\n\nThank you,\nEDU CRM Team`;
+  } ${daysText} ga kechikkan. Iltimos, imkon qadar tezroq to'lovni amalga oshiring.\nImpulse Study LC`;
 
   showReminderDialog.value = true;
 };
@@ -725,12 +729,12 @@ const exportToCSV = () => {
 // Initialize data on component mount
 onMounted(() => {
   // Get URL parameters if available
-  
+
   // Get page parameter
   if (route.query.page) {
     currentPage.value = parseInt(route.query.page as string, 10);
   }
-  
+
   // Get search parameter
   if (route.query.search) {
     searchQuery.value = route.query.search as string;
@@ -745,13 +749,10 @@ onMounted(() => {
 });
 
 // Watch for filter changes and reset to page 1
-watch(
-  [searchQuery, daysFilter],
-  () => {
-    // Reset to page 1 when filters change
-    currentPage.value = 1;
-    // Update URL params
-    updateUrlParams();
-  }
-);
+watch([searchQuery, daysFilter], () => {
+  // Reset to page 1 when filters change
+  currentPage.value = 1;
+  // Update URL params
+  updateUrlParams();
+});
 </script>

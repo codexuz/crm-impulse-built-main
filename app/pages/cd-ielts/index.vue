@@ -26,7 +26,10 @@
           class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
           <CardTitle class="text-sm font-medium">Jami testlar</CardTitle>
-          <Icon name="lucide:clipboard-list" class="h-4 w-4 text-muted-foreground" />
+          <Icon
+            name="lucide:clipboard-list"
+            class="h-4 w-4 text-muted-foreground"
+          />
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">{{ tests.length }}</div>
@@ -38,7 +41,10 @@
           class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
           <CardTitle class="text-sm font-medium">Faol testlar</CardTitle>
-          <Icon name="lucide:check-circle" class="h-4 w-4 text-muted-foreground" />
+          <Icon
+            name="lucide:check-circle"
+            class="h-4 w-4 text-muted-foreground"
+          />
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">{{ activeTests }}</div>
@@ -62,10 +68,15 @@
           class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
           <CardTitle class="text-sm font-medium">O'rtacha narx</CardTitle>
-          <Icon name="lucide:dollar-sign" class="h-4 w-4 text-muted-foreground" />
+          <Icon
+            name="lucide:dollar-sign"
+            class="h-4 w-4 text-muted-foreground"
+          />
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">{{ formatCurrency(averagePrice) }}</div>
+          <div class="text-2xl font-bold">
+            {{ formatCurrency(averagePrice) }}
+          </div>
           <p class="text-xs text-muted-foreground">O'rtacha test narxi</p>
         </CardContent>
       </Card>
@@ -131,23 +142,14 @@
                 {{ formatDate(test.exam_date) }}
               </TableCell>
               <TableCell>{{ test.time }}</TableCell>
-              <TableCell class="max-w-xs truncate">{{ test.location }}</TableCell>
+              <TableCell class="max-w-xs truncate">{{
+                test.location
+              }}</TableCell>
               <TableCell>{{ test.seats }}</TableCell>
               <TableCell>{{ formatCurrency(test.price) }}</TableCell>
               <TableCell class="text-right">
                 <div class="flex justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    @click="viewTest(test)"
-                  >
-                    <Icon name="lucide:eye" class="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    @click="editTest(test)"
-                  >
+                  <Button variant="ghost" size="icon" @click="editTest(test)">
                     <Icon name="lucide:pencil" class="h-4 w-4" />
                   </Button>
                   <Button
@@ -155,7 +157,17 @@
                     size="icon"
                     @click="confirmDelete(test)"
                   >
-                    <Icon name="lucide:trash-2" class="h-4 w-4 text-destructive" />
+                    <Icon
+                      name="lucide:trash-2"
+                      class="h-4 w-4 text-destructive"
+                    />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    @click="viewRegistrations(test)"
+                  >
+                    <Icon name="lucide:arrow-right" class="h-4 w-4" />
                   </Button>
                 </div>
               </TableCell>
@@ -179,7 +191,8 @@
       </CardContent>
       <CardFooter class="flex items-center justify-between">
         <div class="text-sm text-muted-foreground">
-          Ko'rsatilmoqda {{ paginationStart }} - {{ paginationEnd }} / {{ filteredTests.length }} ta test
+          Ko'rsatilmoqda {{ paginationStart }} - {{ paginationEnd }} /
+          {{ filteredTests.length }} ta test
         </div>
         <Pagination
           v-model:page="currentPage"
@@ -330,7 +343,9 @@
           </div>
           <div class="grid grid-cols-3 gap-4">
             <span class="font-semibold">Imtihon sanasi:</span>
-            <span class="col-span-2">{{ formatDate(selectedTest.exam_date) }}</span>
+            <span class="col-span-2">{{
+              formatDate(selectedTest.exam_date)
+            }}</span>
           </div>
           <div class="grid grid-cols-3 gap-4">
             <span class="font-semibold">Vaqt:</span>
@@ -346,7 +361,9 @@
           </div>
           <div class="grid grid-cols-3 gap-4">
             <span class="font-semibold">Narx:</span>
-            <span class="col-span-2">{{ formatCurrency(selectedTest.price) }}</span>
+            <span class="col-span-2">{{
+              formatCurrency(selectedTest.price)
+            }}</span>
           </div>
         </div>
         <DialogFooter>
@@ -361,7 +378,8 @@
         <AlertDialogHeader>
           <AlertDialogTitle>Testni o'chirish</AlertDialogTitle>
           <AlertDialogDescription>
-            Haqiqatan ham bu testni o'chirmoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi.
+            Haqiqatan ham bu testni o'chirmoqchimisiz? Bu amalni ortga qaytarib
+            bo'lmaydi.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -418,9 +436,9 @@ const testForm = ref({
   status: "active" as "active" | "inactive" | "full",
   exam_date: "",
   time: "",
-  location: "",
+  location: "Impulse Study LC, Sergeli 3-metro bekati. Golden Life orqasi",
   seats: null as number | null,
-  price: null as number | null,
+  price: null as number | string | null,
 });
 
 // Computed properties
@@ -494,8 +512,11 @@ const displayedPages = computed(() => {
 });
 
 const showEndEllipsis = computed(() => {
-  const lastDisplayedPage = displayedPages.value[displayedPages.value.length - 1];
-  return lastDisplayedPage !== undefined && lastDisplayedPage < totalPages.value;
+  const lastDisplayedPage =
+    displayedPages.value[displayedPages.value.length - 1];
+  return (
+    lastDisplayedPage !== undefined && lastDisplayedPage < totalPages.value
+  );
 });
 
 // API Functions
@@ -562,7 +583,7 @@ const resetForm = () => {
     status: "active",
     exam_date: "",
     time: "",
-    location: "",
+    location: "Impulse Study LC, Sergeli 3-metro bekati. Golden Life orqasi",
     seats: null,
     price: null,
   };
@@ -590,9 +611,8 @@ const editTest = (test: IELTSTest) => {
   isDialogOpen.value = true;
 };
 
-const viewTest = (test: IELTSTest) => {
-  selectedTest.value = test;
-  isViewDialogOpen.value = true;
+const viewRegistrations = (test: IELTSTest) => {
+  router.push(`/cd-ielts/registrations/${test.id}`);
 };
 
 const confirmDelete = (test: IELTSTest) => {
@@ -632,7 +652,19 @@ const saveTest = async () => {
     return;
   }
 
-  if (testForm.value.price === null || testForm.value.price < 0) {
+  // Convert price to proper number format (handle comma as decimal separator)
+  let priceValue = testForm.value.price;
+  if (typeof priceValue === "string") {
+    // Replace comma with dot for decimal separator
+    priceValue = parseFloat(priceValue.replace(",", "."));
+  }
+
+  if (
+    priceValue === null ||
+    typeof priceValue === "undefined" ||
+    isNaN(Number(priceValue)) ||
+    Number(priceValue) < 0
+  ) {
     toast.error("Narxni kiriting");
     return;
   }
@@ -644,12 +676,12 @@ const saveTest = async () => {
       exam_date: testForm.value.exam_date,
       time: testForm.value.time,
       location: testForm.value.location,
-      seats: testForm.value.seats,
-      price: testForm.value.price,
+      seats: Number(testForm.value.seats),
+      price: Number(priceValue),
     };
 
     if (isEditMode.value && selectedTest.value) {
-      await api.put(
+      await api.patch(
         apiService.value,
         `/cd-ielts/tests/${selectedTest.value.id}`,
         payload
@@ -664,12 +696,22 @@ const saveTest = async () => {
     await fetchTests();
   } catch (error: any) {
     console.error("Failed to save test:", error);
-    toast.error(error?.response?.data?.message || "Testni saqlashda xatolik yuz berdi");
+    toast.error(
+      error?.response?.data?.message || "Testni saqlashda xatolik yuz berdi"
+    );
   }
 };
 
 const deleteTest = async () => {
-  if (!selectedTest.value) return;
+  if (!selectedTest.value) {
+    toast.error("Test tanlanmagan");
+    return;
+  }
+
+  if (!selectedTest.value.id) {
+    toast.error("Test ID topilmadi");
+    return;
+  }
 
   try {
     await api.delete(
@@ -678,6 +720,7 @@ const deleteTest = async () => {
     );
     toast.success("Test muvaffaqiyatli o'chirildi");
     isDeleteDialogOpen.value = false;
+    selectedTest.value = null;
     await fetchTests();
   } catch (error) {
     console.error("Failed to delete test:", error);

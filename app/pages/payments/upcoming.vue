@@ -665,7 +665,7 @@ const sendReminder = (payment: any) => {
   // Pre-fill reminder message
   const amount = formatCurrency(payment.amount);
   const dueDate = formatDate(payment.next_payment_date);
-  reminderMessage.value = `Hurmatli ${payment.student?.first_name}, ${amount} miqdorida to'lovingiz ${dueDate} sanasida muddati tugaydi. O'z vaqtida to'lashingizni so'raymiz. Rahmat!`;
+  reminderMessage.value = `Hurmatli ${payment.student?.first_name}, ${amount} miqdorida to'lovingiz ${dueDate} sanasida muddati tugaydi. O'z vaqtida to'lov qilishingizni so'raymiz.\n Impulse Study LC`;
 
   reminderDialog.value = true;
 };

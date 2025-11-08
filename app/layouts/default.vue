@@ -31,16 +31,17 @@
                     <SidebarMenuButton>
                       <Icon name="lucide:users-round" />
                       <span>Lead boshqaruvi</span>
-                      <Icon name="lucide:chevron-down" class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                      <Icon
+                        name="lucide:chevron-down"
+                        class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180"
+                      />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton asChild>
-                          <NuxtLink to="/leads">
-                            Leadlar
-                          </NuxtLink>
+                          <NuxtLink to="/leads"> Leadlar </NuxtLink>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
@@ -54,6 +55,14 @@
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NuxtLink to="/notifications">
+                    <Icon name="lucide:bell" />
+                    <span>Bildirishnomalar</span>
+                  </NuxtLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -68,16 +77,17 @@
                     <SidebarMenuButton>
                       <Icon name="lucide:graduation-cap" />
                       <span>Talabalar boshqaruvi</span>
-                      <Icon name="lucide:chevron-down" class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                      <Icon
+                        name="lucide:chevron-down"
+                        class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180"
+                      />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton asChild>
-                          <NuxtLink to="/students">
-                            Faol talabalar
-                          </NuxtLink>
+                          <NuxtLink to="/students"> Faol talabalar </NuxtLink>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
@@ -91,23 +101,24 @@
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
-              
+
               <Collapsible defaultOpen class="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
                       <Icon name="lucide:users" />
                       <span>O'qituvchilar boshqaruvi</span>
-                      <Icon name="lucide:chevron-down" class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                      <Icon
+                        name="lucide:chevron-down"
+                        class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180"
+                      />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton asChild>
-                          <NuxtLink to="/teachers">
-                            O'qituvchilar
-                          </NuxtLink>
+                          <NuxtLink to="/teachers"> O'qituvchilar </NuxtLink>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem v-if="hasFinancialAccess">
@@ -121,7 +132,7 @@
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
-              
+
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <NuxtLink to="/groups">
@@ -184,7 +195,10 @@
                     <SidebarMenuButton>
                       <Icon name="lucide:credit-card" />
                       <span>To'lovlar</span>
-                      <Icon name="lucide:chevron-down" class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                      <Icon
+                        name="lucide:chevron-down"
+                        class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180"
+                      />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -214,14 +228,21 @@
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
-              
-              <Collapsible v-if="hasFinancialAccess" defaultOpen class="group/collapsible">
+
+              <Collapsible
+                v-if="hasFinancialAccess"
+                defaultOpen
+                class="group/collapsible"
+              >
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
                       <Icon name="lucide:receipt" />
                       <span>Xarajatlar</span>
-                      <Icon name="lucide:chevron-down" class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                      <Icon
+                        name="lucide:chevron-down"
+                        class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180"
+                      />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -233,28 +254,34 @@
                             Barcha xarajatlar
                           </NuxtLink>
                         </SidebarMenuSubButton>
-                      </SidebarMenuSubItem> <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <NuxtLink to="/expenses/categories">
-                          <Icon name="lucide:tags" />
-                          <span>Xarajatlar kategoriyasi</span>
-                        </NuxtLink>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <NuxtLink to="/expenses/categories">
+                            <Icon name="lucide:tags" />
+                            <span>Xarajatlar kategoriyasi</span>
+                          </NuxtLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
 
-             
-
-              <Collapsible v-if="hasFinancialAccess" defaultOpen class="group/collapsible">
+              <Collapsible
+                v-if="hasFinancialAccess"
+                defaultOpen
+                class="group/collapsible"
+              >
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
                       <Icon name="lucide:banknote" />
                       <span>Oylik maoshlar</span>
-                      <Icon name="lucide:chevron-down" class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                      <Icon
+                        name="lucide:chevron-down"
+                        class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180"
+                      />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -280,7 +307,6 @@
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
       </SidebarContent>
       <SidebarFooter>
         <div class="p-4 border-t"></div>
@@ -347,7 +373,10 @@ const { toast } = useToast();
 
 // Check if user has access to financial features
 const hasFinancialAccess = computed(() => {
-  return auth.value?.user?.id === "d6bd8680-ca59-438c-95ed-ba363a86a065" || auth.value?.user?.phone === "+998900064400";
+  return (
+    auth.value?.user?.id === "d6bd8680-ca59-438c-95ed-ba363a86a065" ||
+    auth.value?.user?.phone === "+998900064400"
+  );
 });
 
 // Compute page title based on route
@@ -369,9 +398,14 @@ const pageTitle = computed(() => {
       lessons: "Darslar",
       expenses: "Xarajatlar",
       "expense-categories": "Xarajatlar kategoriyasi",
-      salaries: "Oylik maoshlar"
+      salaries: "Oylik maoshlar",
+      notifications: "Bildirishnomalar",
+      "cd-ielts": "CD IELTS",
     };
-    return pageTitles[segments[0]] || segments[0].charAt(0).toUpperCase() + segments[0].slice(1);
+    return (
+      pageTitles[segments[0]] ||
+      segments[0].charAt(0).toUpperCase() + segments[0].slice(1)
+    );
   }
   return "Boshqaruv paneli";
 });
@@ -389,7 +423,8 @@ const handleLogout = async () => {
     console.error("Error logging out:", error);
     toast({
       title: "Xatolik",
-      description: "Tizimdan chiqishda xatolik yuz berdi. Iltimos, qayta urinib ko'ring.",
+      description:
+        "Tizimdan chiqishda xatolik yuz berdi. Iltimos, qayta urinib ko'ring.",
       variant: "destructive",
     });
   }
