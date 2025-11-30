@@ -475,7 +475,7 @@ const route = useRoute();
 // State
 const upcomingPayments = ref<any[]>([]);
 const search = ref("");
-const selectedDays = ref("7");
+const selectedDays = ref("3");
 const isLoading = ref(true);
 const selectedPayment = ref<any | null>(null);
 

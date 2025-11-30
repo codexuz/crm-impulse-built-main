@@ -44,12 +44,6 @@
 
     <!-- Table -->
     <Card>
-      <CardHeader>
-        <CardTitle>O'qituvchi profillari</CardTitle>
-        <CardDescription>
-          O'qituvchilarning to'lov turlari va qiymatlari
-        </CardDescription>
-      </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>

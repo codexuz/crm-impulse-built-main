@@ -3,7 +3,9 @@
     <div class="flex justify-between items-center mb-6">
       <div>
         <h2 class="text-3xl font-bold tracking-tight">To'lovlar</h2>
-        <p class="text-muted-foreground">Talabalar to'lovlarini kuzatish va boshqarish</p>
+        <p class="text-muted-foreground">
+          Talabalar to'lovlarini kuzatish va boshqarish
+        </p>
       </div>
       <Dialog>
         <DialogTrigger as-child>
@@ -130,12 +132,78 @@
     </div>
 
     <div class="space-y-4">
-      <div class="flex items-center justify-between gap-2">
-        <Input
-          v-model="search"
-          placeholder="To'lovlarni qidirish..."
-          class="max-w-sm"
-        />
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center justify-between gap-2">
+          <Input
+            v-model="search"
+            placeholder="To'lovlarni qidirish..."
+            class="max-w-sm"
+          />
+        </div>
+
+        <!-- Filters -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          <div>
+            <Label class="text-sm mb-2">To'lov sanasi</Label>
+            <Input
+              v-model="filters.payment_date"
+              type="date"
+              placeholder="To'lov sanasi"
+            />
+          </div>
+          <div>
+            <Label class="text-sm mb-2">Holat</Label>
+            <Select v-model="filters.status">
+              <SelectTrigger>
+                <SelectValue placeholder="Barchasi" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Barchasi</SelectItem>
+                <SelectItem value="completed">Bajarildi</SelectItem>
+                <SelectItem value="pending">Kutilmoqda</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>  
+          <div>
+            <Label class="text-sm mb-2">To'lov usuli</Label>
+            <Select v-model="filters.payment_method">
+              <SelectTrigger>
+                <SelectValue placeholder="Barchasi" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Barchasi</SelectItem>
+                <SelectItem value="Naqd">Naqd</SelectItem>
+                <SelectItem value="Karta">Karta</SelectItem>
+                <SelectItem value="Click">Click</SelectItem>
+                <SelectItem value="Payme">Payme</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label class="text-sm mb-2">Yaratilgan sana</Label>
+            <Input
+              v-model="filters.createdAt"
+              type="date"
+              placeholder="Yaratilgan sana"
+            />
+          </div>
+          <div>
+            <Label class="text-sm mb-2">Keyingi to'lov sanasi</Label>
+            <Input
+              v-model="filters.next_payment_date"
+              type="date"
+              placeholder="Keyingi to'lov sanasi"
+            />
+          </div>
+        </div>
+
+        <!-- Clear Filters Button -->
+        <div v-if="hasActiveFilters" class="flex justify-end">
+          <Button variant="outline" size="sm" @click="clearFilters">
+            <Icon name="lucide:x" class="mr-2 h-4 w-4" />
+            Filtrlarni tozalash
+          </Button>
+        </div>
       </div>
 
       <!-- Payments Table -->
@@ -161,7 +229,9 @@
                     class="h-8 w-8 animate-spin text-primary"
                   />
                 </div>
-                <p class="text-muted-foreground mt-2">To'lovlar yuklanmoqda...</p>
+                <p class="text-muted-foreground mt-2">
+                  To'lovlar yuklanmoqda...
+                </p>
               </TableCell>
             </TableRow>
             <TableRow v-else-if="filteredPayments.length === 0">
@@ -268,8 +338,8 @@
       <div class="flex items-center justify-between py-4">
         <div class="text-sm text-muted-foreground">
           <span class="font-medium">{{ paginationStart }}</span> dan
-          <span class="font-medium">{{ paginationEnd }}</span> gacha,
-          jami <span class="font-medium">{{ totalItems }}</span> to'lov
+          <span class="font-medium">{{ paginationEnd }}</span> gacha, jami
+          <span class="font-medium">{{ totalItems }}</span> to'lov
         </div>
 
         <Pagination
@@ -362,7 +432,9 @@
                   <span>{{ formatDate(selectedPayment.payment_date) }}</span>
                 </div>
                 <div class="flex">
-                  <span class="text-muted-foreground w-28">Keyingi to'lov:</span>
+                  <span class="text-muted-foreground w-28"
+                    >Keyingi to'lov:</span
+                  >
                   <span>{{
                     formatDate(selectedPayment.next_payment_date)
                   }}</span>
@@ -608,6 +680,11 @@ const filters = reactive({
   completed: true,
   pending: true,
   failed: true,
+  payment_date: "",
+  payment_method: "all",
+  createdAt: "",
+  next_payment_date: "",
+  status: "all",
 });
 
 // Selected payment data
@@ -688,7 +765,9 @@ const filteredPayments = computed(() => {
   }
 
   // Apply status filters
-  if (!filters.completed && !filters.pending && !filters.failed) {
+  if (filters.status && filters.status !== "all") {
+    result = result.filter((payment) => payment.status === filters.status);
+  } else if (!filters.completed && !filters.pending && !filters.failed) {
     result = [];
   } else {
     result = result.filter((payment) => {
@@ -696,6 +775,43 @@ const filteredPayments = computed(() => {
       if (payment.status === "pending" && filters.pending) return true;
       if (payment.status === "failed" && filters.failed) return true;
       return false;
+    });
+  }
+
+  // Apply payment_date filter
+  if (filters.payment_date) {
+    result = result.filter((payment) => {
+      const paymentDate = payment.payment_date
+        ? payment.payment_date.split("T")[0]
+        : "";
+      return paymentDate === filters.payment_date;
+    });
+  }
+
+  // Apply payment_method filter
+  if (filters.payment_method && filters.payment_method !== "all") {
+    result = result.filter(
+      (payment) => payment.payment_method === filters.payment_method
+    );
+  }
+
+  // Apply createdAt filter
+  if (filters.createdAt) {
+    result = result.filter((payment) => {
+      const createdDate = payment.createdAt
+        ? payment.createdAt.split("T")[0]
+        : "";
+      return createdDate === filters.createdAt;
+    });
+  }
+
+  // Apply next_payment_date filter
+  if (filters.next_payment_date) {
+    result = result.filter((payment) => {
+      const nextPaymentDate = payment.next_payment_date
+        ? payment.next_payment_date.split("T")[0]
+        : "";
+      return nextPaymentDate === filters.next_payment_date;
     });
   }
 
@@ -731,6 +847,24 @@ const formattedPaymentDate = computed(() => {
 const formattedNextPaymentDate = computed(() => {
   return formatDate(newPayment.next_payment_date);
 });
+
+const hasActiveFilters = computed(() => {
+  return (
+    filters.payment_date !== "" ||
+    (filters.payment_method !== "all" && filters.payment_method !== "") ||
+    filters.createdAt !== "" ||
+    filters.next_payment_date !== "" ||
+    (filters.status !== "all" && filters.status !== "")
+  );
+});
+
+const clearFilters = () => {
+  filters.payment_date = "";
+  filters.payment_method = "all";
+  filters.createdAt = "";
+  filters.next_payment_date = "";
+  filters.status = "all";
+};
 
 const paginationStart = computed(() => {
   return (page.value - 1) * limit.value + 1;
@@ -1020,7 +1154,8 @@ const updatePaymentStatus = async (
     console.error("Failed to update payment status:", error);
     toast({
       title: "Xatolik",
-      description: "To'lov holatini yangilashda xatolik. Qaytadan urinib ko'ring.",
+      description:
+        "To'lov holatini yangilashda xatolik. Qaytadan urinib ko'ring.",
       variant: "destructive",
     });
   }

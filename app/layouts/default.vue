@@ -288,7 +288,7 @@
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton asChild>
-                          <NuxtLink to="/salaries/calculate">
+                          <NuxtLink to="/salaries">
                             Maosh hisoblash
                           </NuxtLink>
                         </SidebarMenuSubButton>
