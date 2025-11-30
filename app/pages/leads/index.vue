@@ -606,7 +606,9 @@
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" @click="trialLessonDialog = false"
+            <Button variant="outline"
+             type="button"
+            @click="trialLessonDialog = false"
               >Bekor qilish</Button
             >
             <Button type="submit" :disabled="isSavingTrial">
@@ -632,7 +634,7 @@
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+            <AlertDialogCancel type="button">Bekor qilish</AlertDialogCancel>
           <AlertDialogAction
             @click="deleteLead"
             class="bg-destructive text-white hover:bg-destructive/90"
@@ -737,7 +739,7 @@
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" @click="convertToStudentDialog = false"
+            <Button variant="outline" type="button" @click="convertToStudentDialog = false"
               >Bekor qilish</Button
             >
             <Button type="submit" :disabled="isCreatingStudent">

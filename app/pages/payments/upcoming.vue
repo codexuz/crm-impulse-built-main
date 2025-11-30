@@ -129,14 +129,6 @@
                   <Button
                     variant="ghost"
                     size="icon"
-                    @click="recordPayment(payment)"
-                  >
-                    <Icon name="lucide:check-circle" class="h-4 w-4" />
-                    <span class="sr-only">To'lovni qayd qilish</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
                     @click="sendReminder(payment)"
                   >
                     <Icon name="lucide:bell" class="h-4 w-4" />
@@ -152,10 +144,6 @@
                       <DropdownMenuItem @click="viewPaymentHistory(payment)">
                         <Icon name="lucide:history" class="mr-2 h-4 w-4" />
                         To'lovlar tarixini ko'rish
-                      </DropdownMenuItem>
-                      <DropdownMenuItem @click="callStudent(payment)">
-                        <Icon name="lucide:phone" class="mr-2 h-4 w-4" />
-                        Talabaga qo'ng'iroq qilish
                       </DropdownMenuItem>
                       <DropdownMenuItem @click="extendDueDate(payment)">
                         <Icon
@@ -259,7 +247,7 @@
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" @click="recordDialog = false"
+            <Button variant="outline" type="button" @click="recordDialog = false"
               >Bekor qilish</Button
             >
             <Button type="submit" :disabled="isSubmitting">
@@ -326,7 +314,7 @@
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" @click="extendDialog = false"
+            <Button variant="outline" type="button" @click="extendDialog = false"
               >Bekor qilish</Button
             >
             <Button type="submit" :disabled="isSubmitting">
@@ -378,14 +366,6 @@
                 <RadioGroupItem value="sms" id="r1" />
                 <Label for="r1">SMS</Label>
               </div>
-              <div class="flex items-center space-x-2">
-                <RadioGroupItem value="call" id="r2" />
-                <Label for="r2">Phone Call</Label>
-              </div>
-              <div class="flex items-center space-x-2">
-                <RadioGroupItem value="telegram" id="r3" />
-                <Label for="r3">Telegram</Label>
-              </div>
             </RadioGroup>
 
             <div class="p-3 bg-muted rounded-md">
@@ -410,7 +390,7 @@
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" @click="reminderDialog = false"
+          <Button variant="outline" type="button" @click="reminderDialog = false"
             >Bekor qilish</Button
           >
           <Button @click="sendReminderNotification" :disabled="isSubmitting">
@@ -564,21 +544,7 @@ const refreshData = () => {
   loadUpcomingPayments();
 };
 
-const recordPayment = (payment: any) => {
-  selectedPayment.value = payment;
 
-  // Pre-fill the payment form
-  newPayment.student_id = payment.student_id;
-  newPayment.amount = payment.amount;
-  newPayment.payment_date = new Date().toISOString().split("T")[0];
-
-  // Calculate next payment date (default to 30 days from now)
-  const nextDate = new Date();
-  nextDate.setDate(nextDate.getDate() + 30);
-  newPayment.next_payment_date = nextDate.toISOString().split("T")[0];
-
-  recordDialog.value = true;
-};
 
 const submitPayment = async () => {
   if (!selectedPayment.value) return;

@@ -2,14 +2,14 @@
   <div class="container py-10 space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight">Debitor Students</h1>
+        <h1 class="text-3xl font-bold tracking-tight">Qarzdor talabalar</h1>
         <p class="text-muted-foreground">
-          Students with overdue payments that require attention
+          Muddati o'tgan to'lovlarga ega talabalar
         </p>
       </div>
       <Button variant="outline" @click="refreshData">
         <Icon name="lucide:refresh-cw" class="mr-2 h-4 w-4" />
-        Refresh
+        Yangilash
       </Button>
     </div>
 
@@ -19,13 +19,13 @@
         <CardHeader
           class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
-          <CardTitle class="text-sm font-medium">Total Debitors</CardTitle>
+          <CardTitle class="text-sm font-medium">Jami qarzdorlar</CardTitle>
           <Icon name="lucide:users" class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">{{ debitorCount }}</div>
           <p class="text-xs text-muted-foreground">
-            Students with overdue payments
+            Muddati o'tgan to'lovlarga ega talabalar
           </p>
         </CardContent>
       </Card>
@@ -33,26 +33,28 @@
         <CardHeader
           class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
-          <CardTitle class="text-sm font-medium">Total Overdue</CardTitle>
+          <CardTitle class="text-sm font-medium">Jami qarz</CardTitle>
           <Icon name="lucide:banknote" class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">
             {{ formatCurrency(totalOverdueAmount) }}
           </div>
-          <p class="text-xs text-muted-foreground">Outstanding payments</p>
+          <p class="text-xs text-muted-foreground">To'lanmagan to'lovlar</p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader
           class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
-          <CardTitle class="text-sm font-medium">Average Days</CardTitle>
+          <CardTitle class="text-sm font-medium">O'rtacha kunlar</CardTitle>
           <Icon name="lucide:clock" class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">{{ averageDaysOverdue }}</div>
-          <p class="text-xs text-muted-foreground">Average days overdue</p>
+          <p class="text-xs text-muted-foreground">
+            O'rtacha kechikish kunlari
+          </p>
         </CardContent>
       </Card>
     </div>
@@ -61,7 +63,7 @@
     <div class="flex flex-col sm:flex-row gap-4">
       <Input
         v-model="searchQuery"
-        placeholder="Search by student name..."
+        placeholder="Talaba nomini qidirish..."
         class="sm:max-w-xs"
       >
         <template #leading>
@@ -71,7 +73,7 @@
       <div class="flex flex-wrap gap-2 sm:ml-auto">
         <Button variant="outline" @click="exportToCSV">
           <Icon name="lucide:download" class="mr-2 h-4 w-4" />
-          Export CSV
+          CSV yuklash
         </Button>
       </div>
     </div>
@@ -83,13 +85,13 @@
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Student</TableHead>
-                <TableHead>Amount Due</TableHead>
-                <TableHead>Payment Date</TableHead>
-                <TableHead>Next Payment Date</TableHead>
-                <TableHead>Days Overdue</TableHead>
-                <TableHead>Notes</TableHead>
-                <TableHead class="text-right">Actions</TableHead>
+                <TableHead>Talaba</TableHead>
+                <TableHead>Qarz miqdori</TableHead>
+                <TableHead>To'lov sanasi</TableHead>
+                <TableHead>Keyingi to'lov sanasi</TableHead>
+                <TableHead>Kechikish kunlari</TableHead>
+                <TableHead>Izohlar</TableHead>
+                <TableHead class="text-right">Harakatlar</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -107,7 +109,7 @@
                     />
                   </div>
                   <p class="text-muted-foreground mt-2">
-                    No debitor students found
+                    Qarzdor talabalar topilmadi
                   </p>
                 </TableCell>
               </TableRow>
@@ -128,11 +130,11 @@
                   <Badge
                     :variant="getOverdueBadgeVariant(debitor.days_overdue)"
                   >
-                    {{ debitor.days_overdue }} days
+                    {{ debitor.days_overdue }} kun
                   </Badge>
                 </TableCell>
                 <TableCell class="max-w-[200px] truncate">{{
-                  debitor.notes || "No notes"
+                  debitor.notes || "Izoh yo'q"
                 }}</TableCell>
                 <TableCell class="text-right">
                   <div class="flex justify-end space-x-1">
@@ -140,7 +142,7 @@
                       variant="ghost"
                       size="icon"
                       @click="markAsPaid(debitor)"
-                      title="Mark as Paid"
+                      title="To'langan deb belgilash"
                     >
                       <Icon
                         name="lucide:check-circle"
@@ -151,7 +153,7 @@
                       variant="ghost"
                       size="icon"
                       @click="sendReminder(debitor)"
-                      title="Send Payment Reminder"
+                      title="Eslatma yuborish"
                     >
                       <Icon name="lucide:mail" class="h-4 w-4" />
                     </Button>
@@ -165,10 +167,11 @@
         <!-- Pagination -->
         <div class="flex items-center justify-between p-4">
           <div class="text-sm text-muted-foreground">
-            Showing <span class="font-medium">{{ paginationStart }}</span> to
-            <span class="font-medium">{{ paginationEnd }}</span> of
+            Ko'rsatilmoqda
+            <span class="font-medium">{{ paginationStart }}</span> dan
+            <span class="font-medium">{{ paginationEnd }}</span> gacha,
             <span class="font-medium">{{ filteredDebitors.length }}</span>
-            debitors
+            qarzdorlar
           </div>
 
           <Pagination
@@ -210,14 +213,14 @@
     <Dialog v-model:open="showPaymentDialog">
       <DialogContent class="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Record Payment</DialogTitle>
+          <DialogTitle>To'lovni qayd qilish</DialogTitle>
           <DialogDescription>
-            Record payment for {{ selectedDebitor?.student_name }}
+            {{ selectedDebitor?.student_name }} uchun to'lovni qayd qilish
           </DialogDescription>
         </DialogHeader>
         <div class="grid gap-4 py-4">
           <div class="grid grid-cols-4 items-center gap-4">
-            <Label for="amount" class="text-right">Amount</Label>
+            <Label for="amount" class="text-right">Summa</Label>
             <div class="col-span-3">
               <Input
                 id="amount"
@@ -230,35 +233,36 @@
             </div>
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
-            <Label for="payment-method" class="text-right"
-              >Payment Method</Label
-            >
+            <Label for="payment-method" class="text-right">To'lov usuli</Label>
             <div class="col-span-3">
               <Select v-model="paymentDetails.method">
                 <SelectTrigger id="payment-method">
-                  <SelectValue placeholder="Select payment method" />
+                  <SelectValue placeholder="To'lov usulini tanlang" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Naqd">Cash (Naqd)</SelectItem>
-                  <SelectItem value="Karta">Card (Karta)</SelectItem>
-                  <SelectItem value="Bank">Bank Transfer</SelectItem>
+                  <SelectItem value="Naqd">Naqd</SelectItem>
+                  <SelectItem value="Karta">Karta</SelectItem>
+                  <SelectItem value="Bank">Bank o'tkazmasi</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
-            <Label for="notes" class="text-right">Notes</Label>
+            <Label for="notes" class="text-right">Izoh</Label>
             <Textarea
               id="notes"
               v-model="paymentDetails.notes"
-              placeholder="Add payment notes"
+              placeholder="To'lov haqida izoh qo'shing"
               class="col-span-3"
             />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" @click="showPaymentDialog = false"
-            >Cancel</Button
+          <Button
+            type="button"
+            variant="outline"
+            @click="showPaymentDialog = false"
+            >Bekor qilish</Button
           >
           <Button @click="confirmPayment" :disabled="isProcessingPayment">
             <Icon
@@ -266,7 +270,11 @@
               name="lucide:loader-2"
               class="mr-2 h-4 w-4 animate-spin"
             />
-            {{ isProcessingPayment ? "Processing..." : "Record Payment" }}
+            {{
+              isProcessingPayment
+                ? "Qayta ishlanmoqda..."
+                : "To'lovni qayd qilish"
+            }}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -276,41 +284,42 @@
     <Dialog v-model:open="showReminderDialog">
       <DialogContent class="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Send Payment Reminder</DialogTitle>
+          <DialogTitle>To'lov eslatmasi yuborish</DialogTitle>
           <DialogDescription>
-            Send a payment reminder to {{ selectedDebitor?.student_name }}
+            {{ selectedDebitor?.student_name }} ga to'lov eslatmasi yuborish
           </DialogDescription>
         </DialogHeader>
         <div class="grid gap-4 py-4">
           <div class="grid grid-cols-4 items-center gap-4">
-            <Label for="reminder-type" class="text-right">Reminder Type</Label>
+            <Label for="reminder-type" class="text-right">Eslatma turi</Label>
             <div class="col-span-3">
               <Select v-model="reminderDetails.type">
                 <SelectTrigger id="reminder-type">
-                  <SelectValue placeholder="Select reminder type" />
+                  <SelectValue placeholder="Eslatma turini tanlang" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="sms">SMS</SelectItem>
-                  <SelectItem value="email">Email</SelectItem>
-                  <SelectItem value="phone">Phone Call</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
-            <Label for="reminder-message" class="text-right">Message</Label>
+            <Label for="reminder-message" class="text-right">Xabar</Label>
             <Textarea
               id="reminder-message"
               v-model="reminderDetails.message"
-              placeholder="Enter reminder message"
+              placeholder="Eslatma xabarini kiriting"
               class="col-span-3"
               rows="4"
             />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" @click="showReminderDialog = false"
-            >Cancel</Button
+          <Button
+            type="button"
+            variant="outline"
+            @click="showReminderDialog = false"
+            >Bekor qilish</Button
           >
           <Button @click="confirmSendReminder" :disabled="isSendingReminder">
             <Icon
@@ -318,7 +327,7 @@
               name="lucide:loader-2"
               class="mr-2 h-4 w-4 animate-spin"
             />
-            {{ isSendingReminder ? "Sending..." : "Send Reminder" }}
+            {{ isSendingReminder ? "Yuborilmoqda..." : "Eslatma yuborish" }}
           </Button>
         </DialogFooter>
       </DialogContent>

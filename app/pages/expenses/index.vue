@@ -66,7 +66,10 @@
           class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
           <CardTitle class="text-sm font-medium">O'rtacha</CardTitle>
-          <Icon name="lucide:trending-up" class="h-4 w-4 text-muted-foreground" />
+          <Icon
+            name="lucide:trending-up"
+            class="h-4 w-4 text-muted-foreground"
+          />
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">
@@ -143,7 +146,10 @@
               <TableRow v-if="loading">
                 <TableCell colspan="7" class="text-center py-10">
                   <div class="flex justify-center items-center">
-                    <Icon name="lucide:loader-2" class="h-8 w-8 animate-spin text-muted-foreground" />
+                    <Icon
+                      name="lucide:loader-2"
+                      class="h-8 w-8 animate-spin text-muted-foreground"
+                    />
                   </div>
                 </TableCell>
               </TableRow>
@@ -155,9 +161,7 @@
                       class="h-8 w-8 text-muted-foreground"
                     />
                   </div>
-                  <p class="text-muted-foreground mt-2">
-                    Xarajatlar topilmadi
-                  </p>
+                  <p class="text-muted-foreground mt-2">Xarajatlar topilmadi</p>
                 </TableCell>
               </TableRow>
               <TableRow
@@ -224,9 +228,11 @@
         <!-- Pagination -->
         <div class="flex items-center justify-between p-4">
           <div class="text-sm text-muted-foreground">
-            Ko'rsatilmoqda <span class="font-medium">{{ paginationStart }}</span> dan
+            Ko'rsatilmoqda
+            <span class="font-medium">{{ paginationStart }}</span> dan
             <span class="font-medium">{{ paginationEnd }}</span> gacha
-            <span class="font-medium">{{ filteredExpenses.length }}</span> ta xarajat
+            <span class="font-medium">{{ filteredExpenses.length }}</span> ta
+            xarajat
           </div>
 
           <Pagination
@@ -317,6 +323,26 @@
               placeholder="0"
               class="col-span-3"
             />
+          </div>
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label for="teacher" class="text-right">O'qituvchi</Label>
+            <div class="col-span-3">
+              <Select v-model="expenseForm.teacher_id">
+                <SelectTrigger id="teacher">
+                  <SelectValue placeholder="O'qituvchini tanlang" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem :value="null">Yo'q</SelectItem>
+                  <SelectItem
+                    v-for="teacher in teachers"
+                    :key="teacher.user_id"
+                    :value="teacher.user_id"
+                  >
+                    {{ teacher.first_name }} {{ teacher.last_name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
             <Label for="expense_date" class="text-right">Sana *</Label>
@@ -479,12 +505,15 @@ interface Category {
 }
 
 interface Teacher {
-  id: string;
+  user_id: string;
+  username: string;
+  phone: string;
   first_name: string;
   last_name: string;
+  is_active: boolean;
 }
 
-const { apiService } = useAuth();
+const { apiService, auth } = useAuth();
 const toast = useToast();
 const router = useRouter();
 const route = useRoute();
@@ -492,6 +521,7 @@ const route = useRoute();
 // State variables
 const expenses = ref<Expense[]>([]);
 const categories = ref<Category[]>([]);
+const teachers = ref<Teacher[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
 const categoryFilter = ref("all");
@@ -512,7 +542,8 @@ const expenseForm = reactive({
   category_id: "",
   amount: 0,
   expense_date: "",
-  teacher_id: "none",
+  teacher_id: null as string | null,
+  reported_by: "",
   description: "",
 });
 
@@ -522,7 +553,9 @@ const filteredExpenses = computed(() => {
     // Filter by search query
     const searchMatch =
       expense.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      expense.description?.toLowerCase().includes(searchQuery.value.toLowerCase());
+      expense.description
+        ?.toLowerCase()
+        .includes(searchQuery.value.toLowerCase());
 
     // Filter by category
     const categoryMatch =
@@ -536,7 +569,10 @@ const filteredExpenses = computed(() => {
 const expensesCount = computed(() => filteredExpenses.value.length);
 
 const totalAmount = computed(() => {
-  return filteredExpenses.value.reduce((sum, expense) => sum + expense.amount, 0);
+  return filteredExpenses.value.reduce(
+    (sum, expense) => sum + expense.amount,
+    0
+  );
 });
 
 const currentMonthAmount = computed(() => {
@@ -577,7 +613,10 @@ const paginationStart = computed(() => {
 });
 
 const paginationEnd = computed(() => {
-  return Math.min(currentPage.value * itemsPerPage, filteredExpenses.value.length);
+  return Math.min(
+    currentPage.value * itemsPerPage,
+    filteredExpenses.value.length
+  );
 });
 
 // Pagination display helpers
@@ -618,7 +657,7 @@ const fetchExpenses = async () => {
   loading.value = true;
   try {
     let endpoint = "/expenses";
-    
+
     // Use date range endpoint if both dates are provided
     if (startDate.value && endDate.value) {
       const params = new URLSearchParams({
@@ -627,7 +666,7 @@ const fetchExpenses = async () => {
       });
       endpoint = `/expenses/reports/date-range?${params.toString()}`;
     }
-    
+
     const response = await api.get<Expense[]>(apiService.value, endpoint);
     expenses.value = response || [];
   } catch (error) {
@@ -656,23 +695,38 @@ const fetchCategories = async () => {
   }
 };
 
+const fetchTeachers = async () => {
+  try {
+    const response = await api.get<Teacher[]>(
+      apiService.value,
+      "/users/teachers"
+    );
+    teachers.value = response || [];
+  } catch (error) {
+    console.error("Failed to fetch teachers:", error);
+    teachers.value = [];
+  }
+};
+
 // Helper functions
 const formatDate = (dateString: string) => {
   if (!dateString) return "N/A";
   const date = new Date(dateString);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
   return `${day}-${month}-${year} ${hours}:${minutes}`;
 };
 
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("uz-UZ", {
-    style: "decimal",
-    minimumFractionDigits: 0,
-  }).format(amount) + " so'm";
+  return (
+    new Intl.NumberFormat("uz-UZ", {
+      style: "decimal",
+      minimumFractionDigits: 0,
+    }).format(amount) + " so'm"
+  );
 };
 
 const formatDateForInput = (dateString: string) => {
@@ -680,10 +734,10 @@ const formatDateForInput = (dateString: string) => {
   const date = new Date(dateString);
   // Format for datetime-local input: YYYY-MM-DDTHH:mm
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
@@ -715,7 +769,7 @@ const editExpense = (expense: Expense) => {
   expenseForm.category_id = expense.category_id;
   expenseForm.amount = expense.amount;
   expenseForm.expense_date = formatDateForInput(expense.expense_date);
-  expenseForm.teacher_id = expense.teacher_id || "none";
+  expenseForm.teacher_id = expense.teacher_id || null;
   expenseForm.description = expense.description || "";
   showExpenseDialog.value = true;
 };
@@ -727,7 +781,12 @@ const deleteExpense = (expense: Expense) => {
 
 const saveExpense = async () => {
   // Validation
-  if (!expenseForm.title || !expenseForm.category_id || !expenseForm.amount || !expenseForm.expense_date) {
+  if (
+    !expenseForm.title ||
+    !expenseForm.category_id ||
+    !expenseForm.amount ||
+    !expenseForm.expense_date
+  ) {
     toast.toast({
       title: "Xatolik",
       description: "Iltimos, barcha majburiy maydonlarni to'ldiring",
@@ -738,12 +797,14 @@ const saveExpense = async () => {
 
   isSaving.value = true;
   try {
+    const userId = auth.value.user?.id;
     const data = {
       title: expenseForm.title,
       category_id: expenseForm.category_id,
       amount: Number(expenseForm.amount),
       expense_date: new Date(expenseForm.expense_date).toISOString(),
-      teacher_id: expenseForm.teacher_id === "none" ? null : expenseForm.teacher_id,
+      teacher_id: expenseForm.teacher_id,
+      reported_by: userId || null,
       description: expenseForm.description || null,
     };
 
@@ -784,10 +845,7 @@ const confirmDelete = async () => {
   if (!selectedExpense.value) return;
 
   try {
-    await api.delete(
-      apiService.value,
-      `/expenses/${selectedExpense.value.id}`
-    );
+    await api.delete(apiService.value, `/expenses/${selectedExpense.value.id}`);
     toast.toast({
       title: "Muvaffaqiyat",
       description: "Xarajat muvaffaqiyatli o'chirildi",
@@ -809,13 +867,20 @@ const resetForm = () => {
   expenseForm.category_id = "";
   expenseForm.amount = 0;
   expenseForm.expense_date = "";
-  expenseForm.teacher_id = "none";
+  expenseForm.teacher_id = null;
   expenseForm.description = "";
   selectedExpense.value = null;
 };
 
 const exportToCSV = () => {
-  const headers = ["Sarlavha", "Kategoriya", "Summa", "O'qituvchi", "Tavsif", "Sana"];
+  const headers = [
+    "Sarlavha",
+    "Kategoriya",
+    "Summa",
+    "O'qituvchi",
+    "Tavsif",
+    "Sana",
+  ];
   const rows = filteredExpenses.value.map((expense) => [
     expense.title,
     getCategoryName(expense.category_id),
@@ -912,6 +977,7 @@ onMounted(() => {
 
   fetchExpenses();
   fetchCategories();
+  fetchTeachers();
 });
 
 // Watch for filter changes and reset to page 1

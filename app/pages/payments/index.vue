@@ -600,7 +600,7 @@
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" @click="editDialog = false"
+            <Button variant="outline" type="button" @click="editDialog = false"
               >Bekor qilish</Button
             >
             <Button type="submit" :disabled="isUpdating">
@@ -626,7 +626,7 @@
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+          <AlertDialogCancel type="button">Bekor qilish</AlertDialogCancel>
           <AlertDialogAction
             @click="confirmDelete"
             class="bg-destructive text-destructive-foreground hover:bg-destructive/90"

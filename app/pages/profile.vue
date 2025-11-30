@@ -44,10 +44,7 @@
       </div>
 
       <!-- Profile information -->
-      <div
-        v-else-if="adminProfile"
-        class="max-w-xl mx-auto gap-6"
-      >
+      <div v-else-if="adminProfile" class="max-w-xl mx-auto gap-6">
         <!-- Profile summary card -->
         <Card class="md:col-span-1">
           <CardHeader class="pb-3">
@@ -121,7 +118,7 @@
               </div>
             </dl>
           </CardContent>
-          <CardFooter>
+          <CardFooter class="flex flex-col gap-2">
             <Button
               variant="outline"
               class="w-full"
@@ -130,10 +127,16 @@
               <Icon name="lucide:pencil" class="mr-2 h-4 w-4" />
               Edit Profile
             </Button>
+            <Button
+              variant="outline"
+              class="w-full"
+              @click="showPasswordDialog = true"
+            >
+              <Icon name="lucide:lock" class="mr-2 h-4 w-4" />
+              Change Password
+            </Button>
           </CardFooter>
         </Card>
-
-       
       </div>
     </div>
 
@@ -246,7 +249,11 @@
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" @click="showPasswordDialog = false">
+            <Button
+              type="button"
+              variant="outline"
+              @click="showPasswordDialog = false"
+            >
               Cancel
             </Button>
             <Button
@@ -286,8 +293,6 @@ interface AdminProfile extends User {
   // Add any admin-specific fields here
 }
 
-
-
 // Define page meta
 definePageMeta({
   middleware: ["auth"],
@@ -306,8 +311,6 @@ const showPasswordDialog = ref(false);
 const isUpdating = ref(false);
 const isChangingPassword = ref(false);
 const twoFactorEnabled = ref(false);
-
-
 
 // Form state
 const editForm = reactive({
@@ -338,7 +341,7 @@ const loadProfile = async () => {
     }
 
     const userId = auth.value.user?.id;
-    
+
     if (!userId) {
       error.value = "User ID not found in session";
       return;
@@ -357,19 +360,14 @@ const loadProfile = async () => {
     editForm.last_name = response.last_name;
     editForm.username = response.username;
     editForm.phone = response.phone;
-
   } catch (err) {
     console.error("Failed to load admin profile:", err);
     error.value =
-      err instanceof Error
-        ? err.message
-        : "Failed to load profile information";
+      err instanceof Error ? err.message : "Failed to load profile information";
   } finally {
     isLoading.value = false;
   }
 };
-
-
 
 // Update profile
 const updateProfile = async () => {
@@ -418,7 +416,7 @@ const changePassword = async () => {
   try {
     await api.post(
       apiService.value,
-      `/users/${adminProfile.value.user_id}/change-password`,
+      `/users/${adminProfile.value.user_id}/update-password`,
       {
         currentPassword: passwordForm.currentPassword,
         newPassword: passwordForm.newPassword,
