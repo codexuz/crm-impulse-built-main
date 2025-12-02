@@ -24,6 +24,22 @@ export interface SMSReportRequest {
   is_ad?: string;
 }
 
+export interface SMSUserMessagesRequest {
+  start_date: string;
+  end_date: string;
+  status?: string;
+}
+
+export interface SMSBulkMessage {
+  user_sms_id: string;
+  mobile_phone: string;
+  message: string;
+}
+
+export interface SMSBulkRequest {
+  messages: SMSBulkMessage[];
+}
+
 export interface SMSBalance {
   balance: number;
   currency: string;
@@ -96,13 +112,13 @@ export const useSMS = () => {
   };
 
   /**
-   * Create or update SMS template
+   * Create SMS template
    */
-  const saveSMSTemplate = async (template: SMSTemplate) => {
-    const response = await api.post<SMSTemplate>(
+  const createSMSTemplate = async (templateData: { template: string }) => {
+    const response = await api.post<any>(
       apiService.value,
       "/sms/templates",
-      template
+      templateData
     );
     return response;
   };
@@ -159,13 +175,39 @@ export const useSMS = () => {
     return response;
   };
 
+  /**
+   * Send bulk SMS messages
+   */
+  const sendBulkSMS = async (requestData: SMSBulkRequest) => {
+    const response = await api.post<any>(
+      apiService.value,
+      "/sms/send-bulk",
+      requestData
+    );
+    return response;
+  };
+
+  /**
+   * Get user SMS messages
+   */
+  const getUserMessages = async (requestData: SMSUserMessagesRequest) => {
+    const response = await api.post<any>(
+      apiService.value,
+      "/sms/messages/get-user-messages",
+      requestData
+    );
+    return response;
+  };
+
   return {
     sendSMS,
     sendVerificationSMS,
     getSMSBalance,
     getSMSTemplates,
-    saveSMSTemplate,
+    createSMSTemplate,
     getSMSReport,
+    sendBulkSMS,
+    getUserMessages,
     createPaymentAction,
     updatePaymentAction,
     checkPaymentContact,

@@ -55,6 +55,44 @@
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
+              <Collapsible class="my-2 group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <Icon name="lucide:message-square" />
+                      <span>SMS Xabarnoma</span>
+                      <Icon
+                        name="lucide:chevron-down"
+                        class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180"
+                      />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                       <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <NuxtLink to="/sms/sms-posting"> SMS yuborish </NuxtLink>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <NuxtLink to="/sms/report"> Hisobot </NuxtLink>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <NuxtLink to="/sms/send-sms"> Jo'natmalar </NuxtLink>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <NuxtLink to="/sms/templates"> Shablonlar </NuxtLink>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <NuxtLink to="/notifications">
@@ -288,9 +326,7 @@
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton asChild>
-                          <NuxtLink to="/salaries">
-                            Maosh hisoblash
-                          </NuxtLink>
+                          <NuxtLink to="/salaries"> Maosh hisoblash </NuxtLink>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>

@@ -1,5 +1,5 @@
 <template>
-  <div class="container py-10 space-y-6">
+  <div class="container mx-auto py-10 space-y-6">
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-3xl font-bold tracking-tight">Qarzdor talabalar</h1>
