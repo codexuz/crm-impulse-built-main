@@ -251,8 +251,32 @@
         </Button>
       </div>
 
-      <div class="flex flex-col sm:flex-row gap-4">
-        <div class="w-full sm:w-1/3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="w-full">
+          <Select v-model="teacherFilter" class="w-full">
+            <SelectTrigger class="h-10">
+              <div class="flex items-center">
+                <Icon
+                  name="lucide:graduation-cap"
+                  class="h-4 w-4 mr-2 text-muted-foreground"
+                />
+                <SelectValue placeholder="O'qituvchi bo'yicha saralash" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Barcha o'qituvchilar</SelectItem>
+              <SelectItem
+                v-for="teacher in teachers"
+                :key="teacher.user_id"
+                :value="teacher.user_id"
+              >
+                {{ teacher.first_name }} {{ teacher.last_name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div class="w-full">
           <Select v-model="groupFilter" class="w-full">
             <SelectTrigger class="h-10">
               <div class="flex items-center">
@@ -266,7 +290,7 @@
             <SelectContent>
               <SelectItem value="all">Barcha guruhlar</SelectItem>
               <SelectItem
-                v-for="group in groups"
+                v-for="group in availableGroupsForFilter"
                 :key="group.id"
                 :value="group.id"
               >
@@ -276,7 +300,7 @@
           </Select>
         </div>
 
-        <div class="w-full sm:w-1/3">
+        <div class="w-full">
           <Select v-model="statusFilter" class="w-full">
             <SelectTrigger class="h-10">
               <div class="flex items-center">
@@ -297,7 +321,7 @@
           </Select>
         </div>
 
-        <div class="w-full sm:w-1/3">
+        <div class="w-full">
           <div class="flex items-center space-x-2">
             <div class="w-1/2">
               <Label for="date-from" class="text-xs">Dan</Label>
@@ -512,7 +536,7 @@
           <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
           <AlertDialogAction
             @click="deleteAttendanceRecord"
-            class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            class="bg-destructive text-white hover:bg-destructive/90"
           >
             <Icon
               v-if="isDeleting"
@@ -549,6 +573,7 @@ interface Attendance {
 interface Group {
   id: string;
   name: string;
+  teacher_id?: string;
 }
 
 interface Student {
@@ -589,6 +614,7 @@ const isLoadingStudents = ref(false);
 const isLoadingTeachers = ref(false);
 const search = ref("");
 const groupFilter = ref("all");
+const teacherFilter = ref("all");
 const statusFilter = ref("all");
 const itemsPerPage = 10;
 const page = ref(1);
@@ -656,6 +682,11 @@ const filteredAttendance = computed(() => {
   // Apply group filter
   if (groupFilter.value !== "all") {
     result = result.filter((record) => record.group_id === groupFilter.value);
+  }
+
+  // Apply teacher filter
+  if (teacherFilter.value !== "all") {
+    result = result.filter((record) => record.teacher_id === teacherFilter.value);
   }
 
   // Apply status filter
@@ -737,8 +768,21 @@ watch(
   }
 );
 
+// Filter groups based on selected teacher
+const availableGroupsForFilter = computed(() => {
+  if (teacherFilter.value === "all") {
+    return groups.value;
+  }
+  return groups.value.filter((g) => g.teacher_id === teacherFilter.value);
+});
+
+// Watch for teacher filter changes to reset group filter
+watch(teacherFilter, () => {
+  groupFilter.value = "all";
+});
+
 // Watch for filter changes to reset page
-watch([search, groupFilter, statusFilter, dateFrom, dateTo], () => {
+watch([search, groupFilter, teacherFilter, statusFilter, dateFrom, dateTo], () => {
   // Reset to first page when filters change
   page.value = 1;
 });

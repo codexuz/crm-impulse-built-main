@@ -150,6 +150,30 @@
             </SelectItem>
           </SelectContent>
         </Select>
+
+        <Select
+          v-model="filterTeacher"
+          class="w-[200px]"
+          :disabled="isLoadingTeachers"
+        >
+          <SelectTrigger>
+            <div v-if="isLoadingTeachers" class="flex items-center gap-2">
+              <Icon name="lucide:loader-2" class="h-4 w-4 animate-spin" />
+              <span>Yuklanmoqda...</span>
+            </div>
+            <SelectValue v-else placeholder="O'qituvchi bo'yicha saralash" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Barcha o'qituvchilar</SelectItem>
+            <SelectItem
+              v-for="teacher in teachers"
+              :key="teacher.user_id"
+              :value="teacher.user_id"
+            >
+              {{ teacher.first_name }} {{ teacher.last_name }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
 
@@ -419,6 +443,7 @@ const totalPages = computed(() => Math.ceil(totalItems.value / limit.value));
 const search = ref("");
 const filterStatus = ref("all");
 const filterCourse = ref("all");
+const filterTeacher = ref("all");
 
 // Selected group data
 const selectedGroup = ref<Group | null>(null);
@@ -462,6 +487,11 @@ const filteredGroups = computed(() => {
   // Apply course filter
   if (filterCourse.value && filterCourse.value !== "all") {
     result = result.filter((group) => group.level_id === filterCourse.value);
+  }
+
+  // Apply teacher filter
+  if (filterTeacher.value && filterTeacher.value !== "all") {
+    result = result.filter((group) => group.teacher_id === filterTeacher.value);
   }
 
   // Apply pagination
