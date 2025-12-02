@@ -367,6 +367,18 @@
                 <Label for="r1">SMS</Label>
               </div>
             </RadioGroup>
+              <RadioGroup v-model="reminderMethod">
+              <div class="flex items-center space-x-2">
+                <RadioGroupItem value="phone" id="r1" />
+                <Label for="r1">Telefon</Label>
+              </div>
+            </RadioGroup>
+              <RadioGroup v-model="reminderMethod">
+              <div class="flex items-center space-x-2">
+                <RadioGroupItem value="in_person" id="r1" />
+                <Label for="r1">O'zi bilan gaplashildi</Label>
+              </div>
+            </RadioGroup>
 
             <div class="p-3 bg-muted rounded-md">
               <p class="text-sm">
@@ -412,6 +424,7 @@ import { ref, computed, reactive, onMounted, watch } from "vue";
 import { api } from "~/lib/api";
 import { useAuth } from "~/composables/useAuth";
 import { useToast } from "~/composables/useToast";
+import { useSMS } from "~/composables/useSMS";
 import {
   Select,
   SelectContent,
@@ -524,7 +537,6 @@ const loadUpcomingPayments = async () => {
       toast({
         title: "Ogohlantirish",
         description: "Kelayotgan to'lovlar topilmadi",
-        variant: "warning",
       });
     }
   } catch (error) {
@@ -601,7 +613,7 @@ const submitExtension = async () => {
         next_payment_date: extendedDate.value,
         notes: extensionReason.value
           ? `Due date extended: ${extensionReason.value}`
-          : selectedPayment.value.notes,
+          : (selectedPayment.value.notes || ""),
       }
     );
 
@@ -629,9 +641,22 @@ const sendReminder = (payment: any) => {
   selectedPayment.value = payment;
 
   // Pre-fill reminder message
-  const amount = formatCurrency(payment.amount);
-  const dueDate = formatDate(payment.next_payment_date);
-  reminderMessage.value = `Hurmatli ${payment.student?.first_name}, ${amount} miqdorida to'lovingiz ${dueDate} sanasida muddati tugaydi. O'z vaqtida to'lov qilishingizni so'raymiz.\n Impulse Study LC`;
+  const formatCurrencyForSMS = (amount: number): string => {
+    return new Intl.NumberFormat('uz-UZ').format(amount) + " so'm";
+  };
+
+  const formatDateForSMS = (dateString: string): string => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+  };
+
+  const fullName = `${payment.student?.first_name || ''} ${payment.student?.last_name || ''}`.trim();
+  const amount = formatCurrencyForSMS(payment.amount);
+  const dueDate = formatDateForSMS(payment.next_payment_date);
+  reminderMessage.value = `Hurmatli ${fullName}, ${amount} miqdorida to'lovingiz ${dueDate} sanasida muddati tugaydi. O'z vaqtida to'lov qilishingizni so'raymiz. Impulse Study LC`;
 
   reminderDialog.value = true;
 };
@@ -641,8 +666,18 @@ const sendReminderNotification = async () => {
 
   isSubmitting.value = true;
   try {
-    // Simulate sending notification (in a real app, you'd call an API)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const { sendPaymentReminder } = useSMS();
+
+    // Send the payment reminder using the composable
+    const fullName = `${selectedPayment.value.student?.first_name || ''} ${selectedPayment.value.student?.last_name || ''}`.trim();
+    await sendPaymentReminder({
+      paymentId: selectedPayment.value.id,
+      studentName: fullName,
+      amount: selectedPayment.value.amount,
+      dueDate: selectedPayment.value.next_payment_date,
+      customMessage: reminderMessage.value || undefined,
+      actionType: reminderMethod.value as "sms" | "phone" | "in_person",
+    });
 
     toast({
       title: "Muvaffaqiyat",
