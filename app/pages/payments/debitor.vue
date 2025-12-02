@@ -91,17 +91,18 @@
                 <TableHead>Keyingi to'lov sanasi</TableHead>
                 <TableHead>Kechikish kunlari</TableHead>
                 <TableHead>Izohlar</TableHead>
+                <TableHead>Aloqa</TableHead>
                 <TableHead class="text-right">Harakatlar</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow v-if="loading">
-                <TableCell colspan="7" class="text-center py-10">
+                <TableCell colspan="8" class="text-center py-10">
                   <Spinner class="mx-auto" />
                 </TableCell>
               </TableRow>
               <TableRow v-else-if="filteredDebitors.length === 0">
-                <TableCell colspan="7" class="text-center py-10">
+                <TableCell colspan="8" class="text-center py-10">
                   <div class="flex justify-center">
                     <Icon
                       name="lucide:search-x"
@@ -136,19 +137,37 @@
                 <TableCell class="max-w-[200px] truncate">{{
                   debitor.notes || "Izoh yo'q"
                 }}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    @click="openContactModal(debitor)"
+                    :class="{
+                      'text-green-600 hover:text-green-700':
+                        contactStatus[debitor.id],
+                      'text-gray-400 hover:text-gray-500':
+                        !contactStatus[debitor.id],
+                    }"
+                  >
+                    <Icon
+                      :name="
+                        contactStatus[debitor.id]
+                          ? 'lucide:check-circle'
+                          : 'lucide:plus-circle'
+                      "
+                      class="h-4 w-4"
+                    />
+                    <span class="sr-only">
+                      {{
+                        contactStatus[debitor.id]
+                          ? "Aloqa ma'lumotlarini ko'rish/tahrirlash"
+                          : "Aloqa qilish"
+                      }}
+                    </span>
+                  </Button>
+                </TableCell>
                 <TableCell class="text-right">
                   <div class="flex justify-end space-x-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      @click="markAsPaid(debitor)"
-                      title="To'langan deb belgilash"
-                    >
-                      <Icon
-                        name="lucide:check-circle"
-                        class="h-4 w-4 text-green-500"
-                      />
-                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -332,6 +351,145 @@
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <!-- Contact Modal -->
+    <Dialog v-model:open="contactDialog">
+      <DialogContent class="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>{{
+            isEditMode ? "Aloqa ma'lumotlarini tahrirlash" : "Aloqa qo'shish"
+          }}</DialogTitle>
+          <DialogDescription>
+            {{
+              isEditMode
+                ? "Mavjud aloqa ma'lumotlarini tahrirlash"
+                : "To'lov uchun aloqa ma'lumotlarini kiritish"
+            }}
+          </DialogDescription>
+        </DialogHeader>
+        <div v-if="selectedDebitor" class="py-4">
+          <div class="flex items-center gap-4 mb-6">
+            <Avatar class="h-12 w-12">
+              <AvatarFallback>{{
+                getInitials(selectedDebitor.student_name || "")
+              }}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 class="font-medium text-lg">
+                {{ selectedDebitor.student_name }}
+              </h3>
+              <p class="text-sm text-muted-foreground">
+                Qarz summasi: {{ formatCurrency(selectedDebitor.amount) }}
+              </p>
+              <p class="text-sm text-muted-foreground">
+                Kechikish: {{ selectedDebitor.days_overdue }} kun
+              </p>
+            </div>
+          </div>
+
+          <!-- Show existing action info in edit mode -->
+          <div
+            v-if="isEditMode && selectedAction"
+            class="mb-6 p-4 bg-muted rounded-lg"
+          >
+            <h4 class="font-medium mb-2">Mavjud aloqa ma'lumoti:</h4>
+            <div class="space-y-1 text-sm text-muted-foreground">
+              <p>
+                <span class="font-medium">Manager:</span>
+                {{ selectedAction.manager?.first_name }}
+                {{ selectedAction.manager?.last_name }}
+              </p>
+              <p>
+                <span class="font-medium">Yaratilgan:</span>
+                {{ formatDate(selectedAction.createdAt) }}
+              </p>
+              <p>
+                <span class="font-medium">Oxirgi yangilanish:</span>
+                {{ formatDate(selectedAction.updatedAt) }}
+              </p>
+            </div>
+          </div>
+
+          <form @submit.prevent="submitContactAction" class="space-y-4">
+            <div class="grid w-full gap-2">
+              <Label for="action_type">Aloqa turi</Label>
+              <Select v-model="contactForm.action_type">
+                <SelectTrigger>
+                  <SelectValue placeholder="Aloqa turini tanlang" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sms">SMS</SelectItem>
+                  <SelectItem value="phone">Telefon</SelectItem>
+                  <SelectItem value="telegram">Telegram</SelectItem>
+                  <SelectItem value="in_person">Yuzma-yuz</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div class="grid w-full gap-2">
+              <Label for="stage">Bosqich</Label>
+              <Select v-model="contactForm.stage">
+                <SelectTrigger>
+                  <SelectValue placeholder="Bosqichni tanlang" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="upcoming">Kelayotgan</SelectItem>
+                  <SelectItem value="debitor">Qarzdor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div class="grid w-full gap-2">
+              <Label for="message">Xabar</Label>
+              <Textarea
+                id="message"
+                v-model="contactForm.message"
+                placeholder="Aloqa xabarini kiriting..."
+                class="min-h-[100px]"
+                required
+              />
+            </div>
+
+            <div class="grid w-full gap-2">
+              <Label for="next_action_date">Keyingi aloqa sanasi</Label>
+              <Input
+                id="next_action_date"
+                type="datetime-local"
+                v-model="contactForm.next_action_date"
+                required
+              />
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                @click="contactDialog = false"
+                :disabled="isSubmittingContact"
+              >
+                Bekor qilish
+              </Button>
+              <Button type="submit" :disabled="isSubmittingContact">
+                <Icon
+                  v-if="isSubmittingContact"
+                  name="lucide:loader-2"
+                  class="mr-2 h-4 w-4 animate-spin"
+                />
+                {{
+                  isSubmittingContact
+                    ? isEditMode
+                      ? "Yangilanmoqda..."
+                      : "Saqlanmoqda..."
+                    : isEditMode
+                    ? "Yangilash"
+                    : "Saqlash"
+                }}
+              </Button>
+            </DialogFooter>
+          </form>
+        </div>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
 
@@ -340,7 +498,27 @@ import { ref, computed, reactive, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuth } from "~/composables/useAuth";
 import { useToast } from "~/composables/useToast";
+import { useSMS } from "~/composables/useSMS";
 import { api } from "~/lib/api";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Pagination,
   PaginationContent,
@@ -369,7 +547,6 @@ const itemsPerPage = 10;
 const totalItems = ref(0);
 const showPaymentDialog = ref(false);
 const showReminderDialog = ref(false);
-const selectedDebitor = ref<any>(null);
 const isProcessingPayment = ref(false);
 const isSendingReminder = ref(false);
 
@@ -386,7 +563,31 @@ const reminderDetails = reactive({
   message: "",
 });
 
+// Contact form state
+const contactDialog = ref(false);
+const isSubmittingContact = ref(false);
+const contactActions = ref<Record<string, any[]>>({}); // Store full payment action data
+const selectedAction = ref<any | null>(null); // Currently selected action for editing
+const isEditMode = ref(false); // Track if modal is in edit mode
+const selectedDebitor = ref<any | null>(null);
+const contactForm = reactive({
+  action_type: "sms" as "sms" | "phone" | "telegram" | "in_person",
+  stage: "debitor" as "upcoming" | "debitor",
+  message: "",
+  next_action_date: "",
+});
+
 // Computed properties
+// Computed property to get contact status (boolean) from actions data
+const contactStatus = computed(() => {
+  const status: Record<string, boolean> = {};
+  Object.keys(contactActions.value).forEach((paymentId) => {
+    const actions = contactActions.value[paymentId];
+    status[paymentId] = actions ? actions.length > 0 : false;
+  });
+  return status;
+});
+
 const debitorCount = computed(() => debitors.value.length);
 
 const totalOverdueAmount = computed(() => {
@@ -502,6 +703,131 @@ const showEndEllipsis = computed(() => {
   return lastDisplayedPage < totalPages.value;
 });
 
+// Contact functions
+const loadContactStatuses = async () => {
+  if (!debitors.value.length) return;
+
+  const { checkPaymentContact } = useSMS();
+  const actions: Record<string, any[]> = {};
+
+  try {
+    await Promise.all(
+      debitors.value.map(async (debitor) => {
+        const contacts = await checkPaymentContact(debitor.id);
+        actions[debitor.id] = contacts || [];
+      })
+    );
+    contactActions.value = actions;
+  } catch (error) {
+    console.error("Failed to load contact statuses:", error);
+  }
+};
+
+const openContactModal = (debitor: any) => {
+  selectedDebitor.value = debitor;
+
+  const existingActions = contactActions.value[debitor.id];
+
+  if (existingActions && existingActions.length > 0) {
+    // Edit mode - load existing action data
+    isEditMode.value = true;
+    const latestAction = existingActions[0]; // Get the latest action
+    selectedAction.value = latestAction;
+
+    // Pre-fill form with existing data
+    contactForm.action_type = latestAction.action_type;
+    contactForm.stage = latestAction.stage;
+    contactForm.message = latestAction.message;
+    contactForm.next_action_date = latestAction.next_action_date;
+  } else {
+    // Create mode - reset form
+    isEditMode.value = false;
+    selectedAction.value = null;
+
+    contactForm.action_type = "sms";
+    contactForm.stage = "debitor";
+    contactForm.message = "";
+
+    // Set default next action date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    contactForm.next_action_date = tomorrow.toISOString().slice(0, 16);
+  }
+
+  contactDialog.value = true;
+};
+
+const submitContactAction = async () => {
+  if (!selectedDebitor.value) return;
+
+  isSubmittingContact.value = true;
+
+  try {
+    const { createPaymentAction, updatePaymentAction } = useSMS();
+    const { auth } = useAuth();
+
+    const managerId = auth.value.user?.id;
+    if (!managerId) {
+      throw new Error("Manager ID not found");
+    }
+
+    if (isEditMode.value && selectedAction.value) {
+      // Update existing action
+      await updatePaymentAction(selectedAction.value.id, {
+        payment_id: selectedDebitor.value.id,
+        manager_id: managerId,
+        stage: contactForm.stage,
+        action_type: contactForm.action_type,
+        message: contactForm.message,
+        next_action_date: contactForm.next_action_date,
+      });
+
+      toast.toast({
+        title: "Muvaffaqiyat",
+        description: "Aloqa ma'lumoti muvaffaqiyatli yangilandi",
+      });
+    } else {
+      // Create new action
+      await createPaymentAction({
+        payment_id: selectedDebitor.value.id,
+        manager_id: managerId,
+        stage: contactForm.stage,
+        action_type: contactForm.action_type,
+        message: contactForm.message,
+        next_action_date: contactForm.next_action_date,
+      });
+
+      toast.toast({
+        title: "Muvaffaqiyat",
+        description: "Aloqa ma'lumoti muvaffaqiyatli saqlandi",
+      });
+    }
+
+    // Reload contact statuses to get updated data
+    await loadContactStatuses();
+
+    contactDialog.value = false;
+  } catch (error) {
+    console.error("Failed to save contact action:", error);
+    toast.toast({
+      title: "Xatolik",
+      description: "Aloqa ma'lumotini saqlashda xatolik yuz berdi",
+      variant: "destructive",
+    });
+  } finally {
+    isSubmittingContact.value = false;
+  }
+};
+
+const getInitials = (name: string): string => {
+  return name
+    .split(" ")
+    .map((n) => n.charAt(0))
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
+
 // Fetch debitor students data
 const fetchDebitors = async () => {
   loading.value = true;
@@ -513,6 +839,8 @@ const fetchDebitors = async () => {
 
     debitors.value = response.payments || [];
     totalItems.value = response.count || 0;
+    // Load contact statuses after debitors are loaded
+    await loadContactStatuses();
   } catch (error) {
     console.error("Failed to fetch debitor data:", error);
     toast.toast({
@@ -647,13 +975,25 @@ const viewStudentProfile = (studentId: string) => {
 const sendReminder = (debitor: any) => {
   selectedDebitor.value = debitor;
 
-  // Pre-populate reminder message based on days overdue
+  // Format currency for SMS (e.g., "1,300,000 so'm")
+  const formatCurrencyForSMS = (amount: number): string => {
+    return new Intl.NumberFormat("uz-UZ").format(amount) + " so'm";
+  };
+
+  // Format date for SMS (DD.MM.YYYY)
+  const formatDateForSMS = (dateString: string): string => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+  };
+
+  const amount = formatCurrencyForSMS(debitor.amount);
   const daysText = debitor.days_overdue === 1 ? "kun" : "kun";
-  reminderDetails.message = `Hurmatli ${
-    debitor.student_name
-  },\nSizning ${formatCurrency(debitor.amount)} miqdoridagi to'lovingiz ${
-    debitor.days_overdue
-  } ${daysText} ga kechikkan. Iltimos, imkon qadar tezroq to'lovni amalga oshiring.\nImpulse Study LC`;
+
+  // For overdue payments, emphasize how many days overdue
+  reminderDetails.message = `Hurmatli ${debitor.student_name}, Sizning ${amount} miqdoridagi to'lovingiz ${debitor.days_overdue} ${daysText} ga kechikkan. Iltimos, imkon qadar tezroq to'lovni amalga oshiring. Impulse Study LC`;
 
   showReminderDialog.value = true;
 };
@@ -663,29 +1003,44 @@ const confirmSendReminder = async () => {
 
   isSendingReminder.value = true;
   try {
-    // Make API call to send reminder
-    await api.post(
-      apiService.value,
-      `/student-payments/${selectedDebitor.value.id}/send-reminder`,
-      {
-        reminder_type: reminderDetails.type,
-        message: reminderDetails.message,
-      }
-    );
+    // Only handle SMS reminders with the new SMS implementation
+    if (reminderDetails.type === "sms") {
+      const { sendSMS } = useSMS();
 
-    // Show success message
-    toast.toast({
-      title: "Success",
-      description: `Reminder sent to ${selectedDebitor.value.student_name}`,
-    });
+      // Get student's phone number - check all possible phone field locations
+      const phoneNumber =
+        selectedDebitor.value.student_phone ||
+        selectedDebitor.value.student?.phone ||
+        selectedDebitor.value.phone;
+      if (!phoneNumber) {
+        throw new Error("Talabaning telefon raqami mavjud emas");
+      }
+
+      // Send SMS using the new endpoint
+      await sendSMS({
+        mobile_phone: phoneNumber,
+        message: reminderDetails.message || "To'lov eslatmasi",
+      });
+
+      toast.toast({
+        title: "Muvaffaqiyat",
+        description: "SMS muvaffaqiyatli yuborildi",
+      });
+    } else {
+      // For other types, show a notification since they don't require API calls to SMS service
+      toast.toast({
+        title: "Eslatma",
+        description: "Eslatma saqlandi",
+      });
+    }
 
     // Close dialog
     showReminderDialog.value = false;
   } catch (error) {
     console.error("Failed to send reminder:", error);
     toast.toast({
-      title: "Error",
-      description: "Failed to send payment reminder",
+      title: "Xatolik",
+      description: "Eslatma yuborishda xatolik yuz berdi",
       variant: "destructive",
     });
   } finally {

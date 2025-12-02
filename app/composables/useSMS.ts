@@ -1,150 +1,173 @@
 import { api } from "~/lib/api";
 import { useAuth } from "./useAuth";
 
-export interface PaymentAction {
-    payment_id: string;
-    manager_id: string;
-    stage: "upcoming" | "debitor";
-    action_type: "sms" | "phone" | "in_person";
-    message: string;
-    next_action_date: string;
+export interface SMSMessage {
+  mobile_phone: string;
+  message: string;
 }
 
-export interface SMSReminderOptions {
-    paymentId: string;
-    studentName: string;
-    amount: number;
-    dueDate: string;
-    customMessage?: string;
-    actionType?: "sms" | "phone" | "in_person";
+export interface SMSVerification {
+  mobile_phone: string;
+  code: string;
+}
+
+export interface SMSTemplate {
+  id?: string;
+  name: string;
+  message: string;
+}
+
+export interface SMSReportRequest {
+  start_date: string;
+  to_date: string;
+  status?: string;
+  is_ad?: string;
+}
+
+export interface SMSBalance {
+  balance: number;
+  currency: string;
+}
+
+export interface SMSReport {
+  total_count: number;
+  delivered_count: number;
+  failed_count: number;
+  pending_count: number;
+  cost: number;
+}
+
+export interface PaymentAction {
+  payment_id: string;
+  manager_id: string;
+  stage: "upcoming" | "debitor";
+  action_type: "sms" | "phone" | "telegram" | "in_person";
+  message: string;
+  next_action_date: string;
 }
 
 export const useSMS = () => {
-    const { apiService, auth } = useAuth();
+  const { apiService } = useAuth();
 
-    /**
-     * Send a payment reminder via SMS
-     */
-    const sendPaymentReminder = async (options: SMSReminderOptions) => {
-        const {
-            paymentId,
-            studentName,
-            amount,
-            dueDate,
-            customMessage,
-            actionType = "sms",
-        } = options;
+  /**
+   * Send SMS message
+   */
+  const sendSMS = async (smsData: SMSMessage) => {
+    const response = await api.post<any>(
+      apiService.value,
+      "/sms/send",
+      smsData
+    );
+    return response;
+  };
 
-        // Get the current user (manager) ID
-        const managerId = auth.value.user?.id;
+  /**
+   * Send verification SMS
+   */
+  const sendVerificationSMS = async (verificationData: SMSVerification) => {
+    const response = await api.post<any>(
+      apiService.value,
+      "/sms/send-verification",
+      verificationData
+    );
+    return response;
+  };
 
-        if (!managerId) {
-            throw new Error("Manager ID not found. Please log in again.");
-        }
+  /**
+   * Get SMS balance
+   */
+  const getSMSBalance = async (): Promise<SMSBalance> => {
+    const response = await api.get<SMSBalance>(
+      apiService.value,
+      "/sms/balance"
+    );
+    return response;
+  };
 
-        // Format currency for SMS (e.g., "1,300,000 so'm")
-        const formatCurrency = (amount: number): string => {
-            return new Intl.NumberFormat("uz-UZ").format(amount) + " so'm";
-        };
+  /**
+   * Get SMS templates
+   */
+  const getSMSTemplates = async (): Promise<SMSTemplate[]> => {
+    const response = await api.get<SMSTemplate[]>(
+      apiService.value,
+      "/sms/templates"
+    );
+    return response;
+  };
 
-        // Format date for SMS (DD.MM.YYYY)
-        const formatDate = (dateString: string): string => {
-            const date = new Date(dateString);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            return `${day}.${month}.${year}`;
-        };
+  /**
+   * Create or update SMS template
+   */
+  const saveSMSTemplate = async (template: SMSTemplate) => {
+    const response = await api.post<SMSTemplate>(
+      apiService.value,
+      "/sms/templates",
+      template
+    );
+    return response;
+  };
 
-        // Default message template
-        const defaultMessage = `Hurmatli ${studentName}, ${formatCurrency(amount)} miqdorida to'lovingiz ${formatDate(dueDate)} sanasida muddati tugaydi. O'z vaqtida to'lov qilishingizni so'raymiz. Impulse Study LC`;
+  /**
+   * Get SMS report by date range
+   */
+  const getSMSReport = async (
+    reportRequest: SMSReportRequest
+  ): Promise<SMSReport> => {
+    const response = await api.post<SMSReport>(
+      apiService.value,
+      "/sms/report/total-by-range",
+      reportRequest
+    );
+    return response;
+  };
 
-        // Prepare the payload
-        const payload: PaymentAction = {
-            payment_id: paymentId,
-            manager_id: managerId,
-            stage: "upcoming",
-            action_type: actionType,
-            message: customMessage || defaultMessage,
-            next_action_date: dueDate,
-        };
+  /**
+   * Create payment action
+   */
+  const createPaymentAction = async (actionData: PaymentAction) => {
+    const response = await api.post<any>(
+      apiService.value,
+      "/payment-actions",
+      actionData
+    );
+    return response;
+  };
 
-        // Call the payment-actions endpoint
-        const response = await api.post<any>(
-            apiService.value,
-            "/payment-actions",
-            payload
-        );
+  /**
+   * Update payment action
+   */
+  const updatePaymentAction = async (
+    actionId: string,
+    actionData: PaymentAction
+  ) => {
+    const response = await api.patch<any>(
+      apiService.value,
+      `/payment-actions/${actionId}`,
+      actionData
+    );
+    return response;
+  };
 
-        return response;
-    };
+  /**
+   * Check if payment has been contacted
+   */
+  const checkPaymentContact = async (paymentId: string) => {
+    const response = await api.get<any[]>(
+      apiService.value,
+      `/payment-actions/by-payment/${paymentId}`
+    );
+    return response;
+  };
 
-    /**
-     * Send a custom SMS message
-     */
-    const sendCustomSMS = async (
-        paymentId: string,
-        message: string,
-        nextActionDate: string,
-        stage: "upcoming" | "debitor",
-        actionType: "sms" | "phone" | "in_person"
-    ) => {
-        const managerId = auth.value.user?.id;
-
-        if (!managerId) {
-            throw new Error("Manager ID not found. Please log in again.");
-        }
-
-        const payload: PaymentAction = {
-            payment_id: paymentId,
-            manager_id: managerId,
-            stage,
-            action_type: actionType,
-            message,
-            next_action_date: nextActionDate,
-        };
-
-        const response = await api.post<any>(
-            apiService.value,
-            "/payment-actions",
-            payload
-        );
-
-        return response;
-    };
-
-    /**
-     * Record a phone call action
-     */
-    const recordPhoneCall = async (
-        paymentId: string,
-        notes: string,
-        nextActionDate: string
-    ) => {
-        return sendCustomSMS(paymentId, notes, nextActionDate, "upcoming", "phone");
-    };
-
-    /**
-     * Record an in-person meeting action
-     */
-    const recordInPersonMeeting = async (
-        paymentId: string,
-        notes: string,
-        nextActionDate: string
-    ) => {
-        return sendCustomSMS(
-            paymentId,
-            notes,
-            nextActionDate,
-            "upcoming",
-            "in_person"
-        );
-    };
-
-    return {
-        sendPaymentReminder,
-        sendCustomSMS,
-        recordPhoneCall,
-        recordInPersonMeeting,
-    };
+  return {
+    sendSMS,
+    sendVerificationSMS,
+    getSMSBalance,
+    getSMSTemplates,
+    saveSMSTemplate,
+    getSMSReport,
+    createPaymentAction,
+    updatePaymentAction,
+    checkPaymentContact,
+  };
 };
