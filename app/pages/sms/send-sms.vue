@@ -20,7 +20,7 @@
       <CardContent>
         <!-- Date Filter -->
         <div class="mb-6">
-          <form @submit.prevent="loadUserMessages" class="space-y-4">
+          <form @submit.prevent="searchMessages" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div class="space-y-2">
                 <Label for="start_date">Boshlanish sanasi</Label>
@@ -433,6 +433,12 @@ const showEndEllipsis = computed(() => {
   const lastDisplayedPage = Math.max(...displayedPages.value);
   return lastDisplayedPage < totalPages.value;
 });
+
+// Search messages (when filters change)
+const searchMessages = () => {
+  currentPage.value = 1; // Reset to first page
+  loadUserMessages();
+};
 
 // Pagination navigation
 const navigatePage = (newPage: number) => {
