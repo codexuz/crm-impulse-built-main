@@ -409,8 +409,7 @@
 
             <div class="p-3 bg-muted rounded-md">
               <p class="text-sm">
-                To'lov eslatmasi:
-                muddat
+                To'lov eslatmasi: muddat
                 <span class="font-medium">{{
                   formatDate(selectedPayment.next_payment_date)
                 }}</span>
@@ -804,6 +803,9 @@ const submitContactAction = async () => {
     });
 
     contactDialog.value = false;
+
+    // Reload upcoming payments and contact statuses
+    await loadUpcomingPayments();
   } catch (error) {
     console.error("Failed to create contact action:", error);
     toast({

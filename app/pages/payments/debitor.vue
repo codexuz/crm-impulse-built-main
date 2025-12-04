@@ -994,7 +994,6 @@ const sendReminder = (debitor: any) => {
 
   // For overdue payments, emphasize how many days overdue
   reminderDetails.message = `Hurmatli ${debitor.student_name}, Sizning ${amount} miqdoridagi to'lovingiz ${debitor.days_overdue} ${daysText} ga kechikkan. Iltimos, imkon qadar tezroq to'lovni amalga oshiring. Impulse Study LC`;
-
   showReminderDialog.value = true;
 };
 

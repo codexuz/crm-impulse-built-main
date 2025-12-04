@@ -148,8 +148,8 @@
         <div class="flex items-center justify-between mt-4 py-4">
           <div class="text-sm text-muted-foreground">
             <span class="font-medium">{{ paginationStart }}</span> dan
-            <span class="font-medium">{{ paginationEnd }}</span> gacha,
-            jami <span class="font-medium">{{ total }}</span> sinov darsi
+            <span class="font-medium">{{ paginationEnd }}</span> gacha, jami
+            <span class="font-medium">{{ total }}</span> sinov darsi
           </div>
 
           <Pagination
@@ -192,7 +192,8 @@
         <AlertDialogHeader>
           <AlertDialogTitle>Ishonchingiz komilmi?</AlertDialogTitle>
           <AlertDialogDescription>
-            Bu amalni qaytarib bo'lmaydi. Sinov darsi va unga tegishli barcha ma'lumotlar butunlay o'chiriladi.
+            Bu amalni qaytarib bo'lmaydi. Sinov darsi va unga tegishli barcha
+            ma'lumotlar butunlay o'chiriladi.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -249,7 +250,9 @@
           <Button variant="outline" @click="showEditDialog = false"
             >Bekor qilish</Button
           >
-          <Button type="submit" @click="saveTrialChanges">O'zgarishlarni saqlash</Button>
+          <Button type="submit" @click="saveTrialChanges"
+            >O'zgarishlarni saqlash</Button
+          >
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -426,17 +429,17 @@ const fetchTrialLessons = async () => {
   try {
     // Add pagination parameters to the request
     const params = new URLSearchParams();
-    params.append('page', currentPage.value.toString());
-    params.append('limit', itemsPerPage.toString());
-    
+    params.append("page", currentPage.value.toString());
+    params.append("limit", itemsPerPage.toString());
+
     if (searchQuery.value) {
-      params.append('search', searchQuery.value);
+      params.append("search", searchQuery.value);
     }
-    
+
     if (statusFilter.value) {
-      params.append('status', statusFilter.value);
+      params.append("status", statusFilter.value);
     }
-    
+
     const url = `/lead-trial-lessons?${params.toString()}`;
     const data = await api.get<ApiResponse>(apiService.value, url);
 
@@ -486,12 +489,18 @@ const paginatedTrialLessons = computed(() => {
 
 // Format date
 const formatDate = (dateString: string) => {
-  return format(parseISO(dateString), "MMM dd, yyyy");
+  // Parse as UTC to avoid timezone conversion
+  const date = new Date(dateString);
+  return format(date, "MMM dd, yyyy", { timeZone: "UTC" });
 };
 
 // Format time
 const formatTime = (dateString: string) => {
-  return format(parseISO(dateString), "h:mm a");
+  // Parse as UTC to avoid timezone conversion
+  const date = new Date(dateString);
+  const hours = date.getUTCHours().toString().padStart(2, "0");
+  const minutes = date.getUTCMinutes().toString().padStart(2, "0");
+  return `${hours}:${minutes}`;
 };
 
 // Format phone number
@@ -600,7 +609,9 @@ const deleteTrial = async (id: string) => {
     await api.delete(apiService.value, `/lead-trial-lessons/${id}`);
 
     // Remove from local state
-    trialLessons.value = trialLessons.value.filter((trial: TrialLesson) => trial.id !== id);
+    trialLessons.value = trialLessons.value.filter(
+      (trial: TrialLesson) => trial.id !== id
+    );
 
     // Show success toast
     toast.toast({
@@ -623,17 +634,17 @@ onMounted(() => {
   if (route.query.page) {
     currentPage.value = parseInt(route.query.page as string) || 1;
   }
-  
+
   // Handle search from URL
   if (route.query.search) {
     searchQuery.value = route.query.search as string;
   }
-  
+
   // Handle status filter from URL
   if (route.query.status) {
     statusFilter.value = route.query.status as string;
   }
-  
+
   fetchTrialLessons();
 });
 

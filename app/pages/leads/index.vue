@@ -71,7 +71,9 @@
                       <SelectItem value="Sinovda qatnashdi"
                         >Sinovda qatnashdi</SelectItem
                       >
-                      <SelectItem value="O'qishga yozildi">O'qishga yozildi</SelectItem>
+                      <SelectItem value="O'qishga yozildi"
+                        >O'qishga yozildi</SelectItem
+                      >
                       <SelectItem value="Yo'qotildi">Yo'qotildi</SelectItem>
                     </SelectContent>
                   </Select>
@@ -145,7 +147,11 @@
 
     <!-- Filters and Search -->
     <div class="flex flex-col sm:flex-row gap-4 mb-6">
-      <Input v-model="search" placeholder="Leadlarni qidirish..." class="sm:max-w-xs">
+      <Input
+        v-model="search"
+        placeholder="Leadlarni qidirish..."
+        class="sm:max-w-xs"
+      >
         <template #leading>
           <Icon name="lucide:search" class="h-4 w-4" />
         </template>
@@ -178,7 +184,9 @@
             <SelectItem value="O'zim keldim">O'zim keldim</SelectItem>
             <SelectItem value="Flayer">Flayer</SelectItem>
             <SelectItem value="Banner(yondagi)">Banner(yondagi)</SelectItem>
-            <SelectItem value="Banner(ko'chadagi)">Banner(ko'chadagi)</SelectItem>
+            <SelectItem value="Banner(ko'chadagi)"
+              >Banner(ko'chadagi)</SelectItem
+            >
             <SelectItem value="Boshqa">Boshqa</SelectItem>
           </SelectContent>
         </Select>
@@ -315,8 +323,8 @@
     <div class="flex items-center justify-between py-4">
       <div class="text-sm text-muted-foreground">
         <span class="font-medium">{{ paginationStart }}</span> dan
-        <span class="font-medium">{{ paginationEnd }}</span> gacha,
-        jami <span class="font-medium">{{ totalLeads }}</span> lead
+        <span class="font-medium">{{ paginationEnd }}</span> gacha, jami
+        <span class="font-medium">{{ totalLeads }}</span> lead
       </div>
 
       <Pagination
@@ -356,9 +364,7 @@
       <DialogContent class="sm:max-w-[700px]">
         <DialogHeader>
           <DialogTitle>Lead ma'lumotlari</DialogTitle>
-          <DialogDescription>
-            Lead haqida batafsil ma'lumot
-          </DialogDescription>
+          <DialogDescription> Lead haqida batafsil ma'lumot </DialogDescription>
         </DialogHeader>
         <div v-if="selectedLead" class="py-4">
           <div class="flex justify-between items-start">
@@ -606,9 +612,10 @@
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline"
-             type="button"
-            @click="trialLessonDialog = false"
+            <Button
+              variant="outline"
+              type="button"
+              @click="trialLessonDialog = false"
               >Bekor qilish</Button
             >
             <Button type="submit" :disabled="isSavingTrial">
@@ -617,7 +624,11 @@
                 name="lucide:loader-2"
                 class="mr-2 h-4 w-4 animate-spin"
               />
-              {{ isSavingTrial ? "Saqlanmoqda..." : "Sinov darsini rejalashtirish" }}
+              {{
+                isSavingTrial
+                  ? "Saqlanmoqda..."
+                  : "Sinov darsini rejalashtirish"
+              }}
             </Button>
           </DialogFooter>
         </form>
@@ -630,11 +641,12 @@
         <AlertDialogHeader>
           <AlertDialogTitle>Ishonchingiz komilmi?</AlertDialogTitle>
           <AlertDialogDescription>
-            Bu amalni qaytarib bo'lmaydi. Lead va unga tegishli barcha ma'lumotlar butunlay o'chiriladi.
+            Bu amalni qaytarib bo'lmaydi. Lead va unga tegishli barcha
+            ma'lumotlar butunlay o'chiriladi.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-            <AlertDialogCancel type="button">Bekor qilish</AlertDialogCancel>
+          <AlertDialogCancel type="button">Bekor qilish</AlertDialogCancel>
           <AlertDialogAction
             @click="deleteLead"
             class="bg-destructive text-white hover:bg-destructive/90"
@@ -739,7 +751,10 @@
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" type="button" @click="convertToStudentDialog = false"
+            <Button
+              variant="outline"
+              type="button"
+              @click="convertToStudentDialog = false"
               >Bekor qilish</Button
             >
             <Button type="submit" :disabled="isCreatingStudent">
@@ -760,9 +775,7 @@
       <DialogContent class="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Leadni tahrirlash</DialogTitle>
-          <DialogDescription>
-            Lead ma'lumotlarini yangilash
-          </DialogDescription>
+          <DialogDescription> Lead ma'lumotlarini yangilash </DialogDescription>
         </DialogHeader>
         <form @submit.prevent="updateLead">
           <div class="grid gap-4 py-4">
@@ -811,8 +824,12 @@
                     <SelectItem value="Yangi">Yangi</SelectItem>
                     <SelectItem value="Aloqada">Aloqada</SelectItem>
                     <SelectItem value="Sinovda">Sinovda</SelectItem>
-                    <SelectItem value="Sinovda qatnashdi">Sinovda qatnashdi</SelectItem>
-                    <SelectItem value="O'qishga yozildi">O'qishga yozildi</SelectItem>
+                    <SelectItem value="Sinovda qatnashdi"
+                      >Sinovda qatnashdi</SelectItem
+                    >
+                    <SelectItem value="O'qishga yozildi"
+                      >O'qishga yozildi</SelectItem
+                    >
                     <SelectItem value="Yo'qotildi">Yo'qotildi</SelectItem>
                   </SelectContent>
                 </Select>
@@ -829,8 +846,12 @@
                     <SelectItem value="Do'stimdan">Do'stimdan</SelectItem>
                     <SelectItem value="O'zim keldim">O'zim keldim</SelectItem>
                     <SelectItem value="Flayer">Flayer</SelectItem>
-                    <SelectItem value="Banner(yondagi)">Banner(yondagi)</SelectItem>
-                    <SelectItem value="Banner(ko'chadagi)">Banner(ko'chadagi)</SelectItem>
+                    <SelectItem value="Banner(yondagi)"
+                      >Banner(yondagi)</SelectItem
+                    >
+                    <SelectItem value="Banner(ko'chadagi)"
+                      >Banner(ko'chadagi)</SelectItem
+                    >
                     <SelectItem value="Boshqa">Boshqa</SelectItem>
                   </SelectContent>
                 </Select>
@@ -866,7 +887,9 @@
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" @click="editLeadDialog = false">Bekor qilish</Button>
+            <Button variant="outline" @click="editLeadDialog = false"
+              >Bekor qilish</Button
+            >
             <Button type="submit" :disabled="isUpdatingLead">
               <Icon
                 v-if="isUpdatingLead"
@@ -1072,7 +1095,11 @@ const leadStatuses = [
     label: "O'qishga yozildi",
     description: "Converted to student",
   },
-  { value: "Yo'qotildi", label: "Yo'qotildi", description: "Lead did not convert" },
+  {
+    value: "Yo'qotildi",
+    label: "Yo'qotildi",
+    description: "Lead did not convert",
+  },
 ];
 
 // Computed properties
@@ -1211,7 +1238,8 @@ const loadCourses = async () => {
     console.error("Failed to load courses:", error);
     toast({
       title: "Xatolik",
-      description: "Kurslarni yuklashda xatolik. Standart qiymatlar ishlatilmoqda.",
+      description:
+        "Kurslarni yuklashda xatolik. Standart qiymatlar ishlatilmoqda.",
       variant: "destructive",
     });
   }
@@ -1225,7 +1253,8 @@ const loadTeachers = async () => {
     console.error("Failed to load teachers:", error);
     toast({
       title: "Xatolik",
-      description: "O'qituvchilarni yuklashda xatolik. Standart qiymatlar ishlatilmoqda.",
+      description:
+        "O'qituvchilarni yuklashda xatolik. Standart qiymatlar ishlatilmoqda.",
       variant: "destructive",
     });
   }
@@ -1315,8 +1344,8 @@ const updateLead = async () => {
   try {
     // Make API call to update the lead
     const response = await api.patch<Lead>(
-      apiService.value, 
-      `/leads/${editingLead.id}`, 
+      apiService.value,
+      `/leads/${editingLead.id}`,
       {
         first_name: editingLead.first_name,
         last_name: editingLead.last_name,
@@ -1331,7 +1360,7 @@ const updateLead = async () => {
 
     if (response) {
       // Update the lead in the local array
-      const index = leads.value.findIndex(l => l.id === editingLead.id);
+      const index = leads.value.findIndex((l) => l.id === editingLead.id);
       if (index !== -1) {
         leads.value[index] = { ...leads.value[index], ...response };
       }
@@ -1409,7 +1438,8 @@ const updateLeadStatus = async () => {
     console.error("Failed to update lead status:", error);
     toast({
       title: "Xatolik",
-      description: "Lead holatini yangilashda xatolik. Qaytadan urinib ko'ring.",
+      description:
+        "Lead holatini yangilashda xatolik. Qaytadan urinib ko'ring.",
       variant: "destructive",
     });
   } finally {
@@ -1436,15 +1466,12 @@ const scheduleTrialLesson = (lead: Lead) => {
 const saveTrialLesson = async () => {
   isSavingTrial.value = true;
   try {
-    // Combine date and time
-    const scheduledDate = new Date(trialLesson.scheduledDate);
+    // Combine date and time in UTC to avoid timezone conversion
     const [hours, minutes] = trialLesson.scheduledTime.split(":").map(Number);
-    if (hours !== undefined && minutes !== undefined) {
-      scheduledDate.setHours(hours, minutes);
-    }
+    const scheduledDateTime = `${trialLesson.scheduledDate}T${trialLesson.scheduledTime}:00.000Z`;
 
     const trialLessonData = {
-      scheduledAt: scheduledDate.toISOString(),
+      scheduledAt: scheduledDateTime,
       teacher_id: trialLesson.teacher_id,
       lead_id: trialLesson.lead_id,
       status: trialLesson.status,
@@ -1507,7 +1534,8 @@ const saveTrialLesson = async () => {
     console.error("Failed to schedule trial lesson:", error);
     toast({
       title: "Xatolik",
-      description: "Sinov darsini rejalashtirishda xatolik. Qaytadan urinib ko'ring.",
+      description:
+        "Sinov darsini rejalashtirishda xatolik. Qaytadan urinib ko'ring.",
       variant: "destructive",
     });
   } finally {
@@ -1983,8 +2011,6 @@ const updateUrlParams = () => {
   // Update URL with all params
   router.push({ query });
 };
-
-
 
 // Pagination display helpers
 const displayedPages = computed(() => {

@@ -136,13 +136,56 @@
             </table>
           </div>
         </div>
+
+        <!-- Pagination -->
+        <div
+          v-if="totalPages > 1"
+          class="flex items-center justify-between mt-4 py-4"
+        >
+          <div class="text-sm text-muted-foreground">
+            <span class="font-medium">{{ paginationStart }}</span> dan
+            <span class="font-medium">{{ paginationEnd }}</span> gacha, jami
+            <span class="font-medium">{{ totalMessages }}</span> xabar
+          </div>
+
+          <Pagination
+            :items-per-page="pageSize"
+            :total="totalMessages"
+            :default-page="currentPage"
+            @update:page="onPageChange"
+          >
+            <PaginationContent>
+              <PaginationPrevious
+                :disabled="currentPage === 1"
+                @click="navigatePage(currentPage - 1)"
+              />
+
+              <PaginationItem
+                v-for="pageNum in displayedPages"
+                :key="pageNum"
+                :value="pageNum"
+                :is-active="pageNum === currentPage"
+                @click="navigatePage(pageNum)"
+              >
+                {{ pageNum }}
+              </PaginationItem>
+
+              <PaginationEllipsis v-if="showEndEllipsis" />
+
+              <PaginationNext
+                :disabled="currentPage === totalPages"
+                @click="navigatePage(currentPage + 1)"
+              />
+            </PaginationContent>
+          </Pagination>
+        </div>
       </CardContent>
     </Card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, computed } from "vue";
 import { useSMS } from "~/composables/useSMS";
 import { useToast } from "~/composables/useToast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -157,6 +200,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "~/components/ui/pagination";
 
 definePageMeta({
   middleware: ["auth"],
@@ -171,6 +222,12 @@ const isSending = ref(false);
 const isLoadingMessages = ref(false);
 const selectedTemplate = ref("none");
 
+// Pagination state
+const currentPage = ref(1);
+const pageSize = ref(20);
+const totalPages = ref(1);
+const totalMessages = ref(0);
+
 // Forms
 const smsForm = reactive({
   mobile_phone: "",
@@ -183,14 +240,18 @@ const messageFilters = reactive({
   status: "all",
 });
 
-// Initialize default date range (last 7 days)
+// Initialize default date range (beginning of current month to beginning of next month)
 const initializeDateRange = () => {
   const now = new Date();
-  const weekAgo = new Date();
-  weekAgo.setDate(now.getDate() - 7);
 
-  messageFilters.end_date = now.toISOString().slice(0, 16);
-  messageFilters.start_date = weekAgo.toISOString().slice(0, 16);
+  // Start date: beginning of current month
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  // End date: beginning of next month
+  const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  messageFilters.start_date = startOfMonth.toISOString().slice(0, 16);
+  messageFilters.end_date = startOfNextMonth.toISOString().slice(0, 16);
 };
 
 // Functions
@@ -223,10 +284,16 @@ const loadUserMessages = async () => {
       start_date: startDate,
       end_date: endDate,
       status: messageFilters.status === "all" ? "" : messageFilters.status,
+      page: currentPage.value,
+      page_size: pageSize.value,
+      count: 0,
+      is_ad: "",
     };
 
     const response = await getUserMessages(requestData);
     userMessages.value = response.data?.data?.result || [];
+    totalPages.value = response.data?.data?.last_page || 1;
+    totalMessages.value = response.data?.data?.total || 0;
     console.log("User messages loaded:", response);
   } catch (error) {
     console.error("Failed to load user messages:", error);
@@ -322,6 +389,60 @@ const formatDate = (dateString: string) => {
 
 const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat("uz-UZ").format(amount);
+};
+
+// Pagination computed properties
+const paginationStart = computed(() => {
+  return totalMessages.value === 0
+    ? 0
+    : (currentPage.value - 1) * pageSize.value + 1;
+});
+
+const paginationEnd = computed(() => {
+  return Math.min(currentPage.value * pageSize.value, totalMessages.value);
+});
+
+const displayedPages = computed(() => {
+  if (totalPages.value <= 7) {
+    return Array.from({ length: totalPages.value }, (_, i) => i + 1);
+  }
+
+  const pages = [];
+  pages.push(1);
+
+  if (currentPage.value <= 3) {
+    pages.push(2, 3, 4);
+  } else if (currentPage.value >= totalPages.value - 2) {
+    pages.push(
+      totalPages.value - 3,
+      totalPages.value - 2,
+      totalPages.value - 1
+    );
+  } else {
+    pages.push(currentPage.value - 1, currentPage.value, currentPage.value + 1);
+  }
+
+  if (!pages.includes(totalPages.value)) {
+    pages.push(totalPages.value);
+  }
+
+  return [...new Set(pages)].sort((a, b) => a - b);
+});
+
+const showEndEllipsis = computed(() => {
+  const lastDisplayedPage = Math.max(...displayedPages.value);
+  return lastDisplayedPage < totalPages.value;
+});
+
+// Pagination navigation
+const navigatePage = (newPage: number) => {
+  if (newPage < 1 || newPage > totalPages.value) return;
+  currentPage.value = newPage;
+  loadUserMessages();
+};
+
+const onPageChange = (newPage: number) => {
+  navigatePage(newPage);
 };
 
 // Initialize
