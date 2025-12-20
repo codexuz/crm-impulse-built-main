@@ -39,19 +39,59 @@
             <form @submit.prevent="createAttendanceRecord" class="py-4">
               <div class="grid gap-4">
                 <div>
-                  <Label for="group-select">Guruh</Label>
-                  <Select v-model="newAttendance.group_id" class="w-full mt-1">
-                    <SelectTrigger id="group-select">
-                      <SelectValue placeholder="Guruhni tanlang" />
+                  <Label for="teacher-select">O'qituvchi</Label>
+                  <Select
+                    v-model="newAttendance.teacher_id"
+                    class="w-full mt-1"
+                  >
+                    <SelectTrigger id="teacher-select">
+                      <SelectValue placeholder="O'qituvchini tanlang" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem
-                        v-for="group in groups"
+                        v-for="teacher in teachers"
+                        :key="teacher.user_id"
+                        :value="teacher.user_id"
+                      >
+                        {{ teacher.first_name }} {{ teacher.last_name }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label for="group-select">Guruh</Label>
+                  <Select
+                    v-model="newAttendance.group_id"
+                    class="w-full mt-1"
+                    :disabled="!newAttendance.teacher_id"
+                  >
+                    <SelectTrigger id="group-select">
+                      <SelectValue
+                        :placeholder="
+                          !newAttendance.teacher_id
+                            ? 'Avval o\'qituvchini tanlang'
+                            : 'Guruhni tanlang'
+                        "
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="group in filteredGroupsForTeacher"
                         :key="group.id"
                         :value="group.id"
                       >
                         {{ group.name }}
                       </SelectItem>
+                      <div
+                        v-if="
+                          newAttendance.teacher_id &&
+                          filteredGroupsForTeacher.length === 0
+                        "
+                        class="py-2 px-2 text-center text-muted-foreground"
+                      >
+                        Bu o'qituvchiga guruhlar topilmadi
+                      </div>
                     </SelectContent>
                   </Select>
                 </div>
@@ -106,61 +146,6 @@
                           class="py-2 px-2 text-center text-muted-foreground"
                         >
                           Ushbu guruhda talabalar topilmadi
-                        </div>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div>
-                  <Label for="teacher-select">O'qituvchi</Label>
-                  <div class="relative">
-                    <Select
-                      v-model="newAttendance.teacher_id"
-                      class="w-full mt-1"
-                      :disabled="isLoadingTeachers || !newAttendance.group_id"
-                    >
-                      <SelectTrigger id="teacher-select">
-                        <div class="flex items-center gap-2">
-                          <Icon
-                            v-if="isLoadingTeachers"
-                            name="lucide:loader-2"
-                            class="h-4 w-4 animate-spin"
-                          />
-                          <SelectValue
-                            :placeholder="
-                              !newAttendance.group_id
-                                ? 'Avval guruhni tanlang'
-                                : 'O\'qituvchini tanlang'
-                            "
-                          />
-                        </div>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem
-                          v-for="teacher in teachers"
-                          :key="teacher.user_id"
-                          :value="teacher.user_id"
-                        >
-                          {{ teacher.first_name }} {{ teacher.last_name }}
-                        </SelectItem>
-                        <div
-                          v-if="isLoadingTeachers"
-                          class="flex items-center justify-center py-2"
-                        >
-                          <Icon
-                            name="lucide:loader-2"
-                            class="h-4 w-4 animate-spin mr-2"
-                          />
-                          O'qituvchilar yuklanmoqda...
-                        </div>
-                        <div
-                          v-else-if="
-                            newAttendance.group_id && teachers.length === 0
-                          "
-                          class="py-2 px-2 text-center text-muted-foreground"
-                        >
-                          Ushbu guruhga o'qituvchilar tayinlanmagan
                         </div>
                       </SelectContent>
                     </Select>
@@ -434,7 +419,8 @@
       <div class="text-sm text-muted-foreground">
         <span class="font-medium">{{ paginationStart }}</span> dan
         <span class="font-medium">{{ paginationEnd }}</span> gacha, jami
-        <span class="font-medium">{{ filteredAttendance.length }}</span> ta yozuv
+        <span class="font-medium">{{ filteredAttendance.length }}</span> ta
+        yozuv
       </div>
       <div class="flex items-center space-x-2">
         <Button
@@ -445,7 +431,9 @@
         >
           <Icon name="lucide:chevron-left" class="h-4 w-4" />
         </Button>
-        <div class="text-sm mx-2">{{ page }}-sahifa, jami {{ totalPages || 1 }}</div>
+        <div class="text-sm mx-2">
+          {{ page }}-sahifa, jami {{ totalPages || 1 }}
+        </div>
         <Button
           variant="outline"
           size="sm"
@@ -462,7 +450,9 @@
       <DialogContent class="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Davomat yozuvini tahrirlash</DialogTitle>
-          <DialogDescription> Davomat ma'lumotlarini yangilash </DialogDescription>
+          <DialogDescription>
+            Davomat ma'lumotlarini yangilash
+          </DialogDescription>
         </DialogHeader>
         <form
           v-if="editingAttendance"
@@ -529,7 +519,8 @@
         <AlertDialogHeader>
           <AlertDialogTitle>Ishonchingiz komilmi?</AlertDialogTitle>
           <AlertDialogDescription>
-            Bu amalni ortga qaytarib bo'lmaydi. Bu davomat yozuvi butunlay o'chiriladi.
+            Bu amalni ortga qaytarib bo'lmaydi. Bu davomat yozuvi butunlay
+            o'chiriladi.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -686,7 +677,9 @@ const filteredAttendance = computed(() => {
 
   // Apply teacher filter
   if (teacherFilter.value !== "all") {
-    result = result.filter((record) => record.teacher_id === teacherFilter.value);
+    result = result.filter(
+      (record) => record.teacher_id === teacherFilter.value
+    );
   }
 
   // Apply status filter
@@ -746,23 +739,34 @@ const filteredStudents = computed(() => {
   return [];
 });
 
-// Watch for changes to the selected group and load students and teachers
+const filteredGroupsForTeacher = computed(() => {
+  if (!newAttendance.value.teacher_id) return [];
+  return groups.value.filter(
+    (g) => g.teacher_id === newAttendance.value.teacher_id
+  );
+});
+
+// Watch for changes to the selected teacher to reset group and student
+watch(
+  () => newAttendance.value.teacher_id,
+  () => {
+    // Reset group and student selection when teacher changes
+    newAttendance.value.group_id = "";
+    newAttendance.value.student_id = "";
+  }
+);
+
+// Watch for changes to the selected group and load students
 watch(
   () => newAttendance.value.group_id,
   async (newGroupId) => {
     if (newGroupId) {
-      // Reset student and teacher selection when group changes
+      // Reset student selection when group changes
       newAttendance.value.student_id = "";
-      newAttendance.value.teacher_id = "";
 
       // Load students for this group if not already loaded
       if (!groupStudents.value[newGroupId]) {
         await loadGroupStudents(newGroupId);
-      }
-
-      // Load teachers for this group if not already loaded
-      if (!groupTeachers.value[newGroupId]) {
-        await loadGroupTeachers(newGroupId);
       }
     }
   }
@@ -782,10 +786,13 @@ watch(teacherFilter, () => {
 });
 
 // Watch for filter changes to reset page
-watch([search, groupFilter, teacherFilter, statusFilter, dateFrom, dateTo], () => {
-  // Reset to first page when filters change
-  page.value = 1;
-});
+watch(
+  [search, groupFilter, teacherFilter, statusFilter, dateFrom, dateTo],
+  () => {
+    // Reset to first page when filters change
+    page.value = 1;
+  }
+);
 
 // Methods
 const loadAttendanceRecords = async () => {
@@ -810,7 +817,8 @@ const loadAttendanceRecords = async () => {
     console.error("Failed to load attendance records:", error);
     toast({
       title: "Xatolik",
-      description: "Davomat yozuvlarini yuklashda xatolik. Qaytadan urinib ko'ring.",
+      description:
+        "Davomat yozuvlarini yuklashda xatolik. Qaytadan urinib ko'ring.",
       variant: "destructive",
     });
   } finally {
@@ -887,7 +895,8 @@ const loadGroupStudents = async (groupId: string) => {
     console.error(`Failed to load students for group ${groupId}:`, error);
     toast({
       title: "Xatolik",
-      description: "Ushbu guruh uchun talabalarni yuklashda xatolik. Qaytadan urinib ko'ring.",
+      description:
+        "Ushbu guruh uchun talabalarni yuklashda xatolik. Qaytadan urinib ko'ring.",
       variant: "destructive",
     });
   } finally {
@@ -910,7 +919,8 @@ const loadGroupTeachers = async (groupId: string) => {
     console.error(`Failed to load teachers for group ${groupId}:`, error);
     toast({
       title: "Xatolik",
-      description: "Ushbu guruh uchun o'qituvchilarni yuklashda xatolik. Qaytadan urinib ko'ring.",
+      description:
+        "Ushbu guruh uchun o'qituvchilarni yuklashda xatolik. Qaytadan urinib ko'ring.",
       variant: "destructive",
     });
     // Use all teachers as fallback
@@ -956,7 +966,8 @@ const createAttendanceRecord = async () => {
     console.error("Failed to create attendance record:", error);
     toast({
       title: "Xatolik",
-      description: "Davomat yozuvini yaratishda xatolik. Qaytadan urinib ko'ring.",
+      description:
+        "Davomat yozuvini yaratishda xatolik. Qaytadan urinib ko'ring.",
       variant: "destructive",
     });
   } finally {
@@ -977,7 +988,9 @@ const validateAttendanceForm = () => {
   if (missing.length > 0) {
     toast({
       title: "Tekshirish xatosi",
-      description: `Iltimos, barcha majburiy maydonlarni to'ldiring: ${missing.join(", ")}`,
+      description: `Iltimos, barcha majburiy maydonlarni to'ldiring: ${missing.join(
+        ", "
+      )}`,
       variant: "destructive",
     });
     return false;
@@ -1035,7 +1048,8 @@ const updateAttendanceRecord = async () => {
     console.error("Failed to update attendance record:", error);
     toast({
       title: "Xatolik",
-      description: "Davomat yozuvini yangilashda xatolik. Qaytadan urinib ko'ring.",
+      description:
+        "Davomat yozuvini yangilashda xatolik. Qaytadan urinib ko'ring.",
       variant: "destructive",
     });
   } finally {
@@ -1073,7 +1087,8 @@ const deleteAttendanceRecord = async () => {
     console.error("Failed to delete attendance record:", error);
     toast({
       title: "Xatolik",
-      description: "Davomat yozuvini o'chirishda xatolik. Qaytadan urinib ko'ring.",
+      description:
+        "Davomat yozuvini o'chirishda xatolik. Qaytadan urinib ko'ring.",
       variant: "destructive",
     });
   } finally {

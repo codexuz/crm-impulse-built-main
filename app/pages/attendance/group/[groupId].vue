@@ -8,17 +8,9 @@
         </p>
       </div>
       <div>
-            <div class="flex flex-col space-y-2">
-              <Button
-                variant="outline"
-                size="sm"
-                class="mt-2"
-                @click="selectToday"
-              >
-                <Icon name="lucide:calendar-clock" class="mr-2 h-4 w-4" />
-                Today
-              </Button>
-            </div>
+        <div class="flex flex-col space-y-2">
+          <Input type="date" v-model="dateInputValue" class="w-[180px]" />
+        </div>
       </div>
     </div>
 
@@ -210,6 +202,13 @@ const hasChanges = computed(() => {
   return Object.values(attendanceData).some((data) => data.status !== "");
 });
 
+const dateInputValue = computed({
+  get: () => formatDateForApi(selectedDate.value),
+  set: (value: string) => {
+    selectedDate.value = new Date(value + "T00:00:00");
+  },
+});
+
 // Fetch group details
 const fetchGroupDetails = async () => {
   try {
@@ -361,12 +360,6 @@ const getInitials = (firstName: string, lastName: string): string => {
   return `${firstName?.charAt(0) || ""}${
     lastName?.charAt(0) || ""
   }`.toUpperCase();
-};
-
-// Helper to select today's date
-const selectToday = () => {
-  selectedDate.value = new Date();
-  fetchAttendanceData();
 };
 
 const formatDate = (date: Date): string => {
